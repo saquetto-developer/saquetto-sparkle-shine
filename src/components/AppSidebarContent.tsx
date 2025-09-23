@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { useSidebar } from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import saquettoLogo from "@/assets/saquetto-logo.png"
 
 const navigation = [
@@ -30,7 +32,10 @@ interface AppSidebarContentProps {
 export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarContentProps) {
   const location = useLocation()
   const { user, logout } = useAuth()
+  const { state } = useSidebar()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  
+  const collapsed = state === "collapsed"
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -49,10 +54,54 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
     }
   }
 
+  const NavigationItem = ({ item }: { item: typeof navigation[0] }) => {
+    const isActive = location.pathname === item.url
+    const Icon = item.icon
+
+    const linkContent = (
+      <NavLink
+        key={item.title}
+        to={item.url}
+        onClick={handleItemClick}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+          "hover:bg-muted/50",
+          collapsed ? "justify-center" : "",
+          isActive 
+            ? "bg-primary text-primary-foreground shadow-sm" 
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        {!collapsed && <span>{item.title}</span>}
+      </NavLink>
+    )
+
+    if (collapsed && !isMobile) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {linkContent}
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>{item.title}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    }
+
+    return linkContent
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b px-6 py-4">
+      <div className={cn(
+        "flex items-center border-b py-4",
+        collapsed ? "px-2 justify-center" : "px-6 gap-3"
+      )}>
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
           <img 
             src={saquettoLogo} 
@@ -60,65 +109,72 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
             className="h-5 w-5"
           />
         </div>
-        <div className="flex flex-col">
-          <h2 className="text-base font-semibold">Saquetto</h2>
-          <p className="text-xs text-muted-foreground">Auditoria Fiscal</p>
-        </div>
+        {!collapsed && (
+          <div className="flex flex-col">
+            <h2 className="text-base font-semibold">Saquetto</h2>
+            <p className="text-xs text-muted-foreground">Auditoria Fiscal</p>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-auto py-4">
+      <div className="flex-1 py-4">
         <nav className="space-y-1 px-3">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.url
-            const Icon = item.icon
-
-            return (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                onClick={handleItemClick}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  "hover:bg-muted/50",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.title}</span>
-              </NavLink>
-            )
-          })}
+          {navigation.map((item) => (
+            <NavigationItem key={item.title} item={item} />
+          ))}
         </nav>
       </div>
 
       {/* Footer */}
-      <div className="border-t p-4 space-y-3">
-        {user && (
+      <div className={cn(
+        "border-t p-4 space-y-3",
+        collapsed && "px-2"
+      )}>
+        {user && !collapsed && (
           <div className="text-xs text-muted-foreground">
             <p>Logado como:</p>
             <p className="font-medium text-foreground truncate">{user.email}</p>
           </div>
         )}
         
-        {!isMobile && (
+        {!isMobile && !collapsed && (
           <div className="flex items-center justify-center">
             <ThemeToggle />
           </div>
         )}
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-        >
-          <LogOut className="h-4 w-4" />
-          {isLoggingOut ? "Saindo..." : "Sair"}
-        </Button>
+        {collapsed && !isMobile ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full justify-center p-2 text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>{isLoggingOut ? "Saindo..." : "Sair"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            {!collapsed && (isLoggingOut ? "Saindo..." : "Sair")}
+          </Button>
+        )}
       </div>
     </div>
   )
