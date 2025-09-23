@@ -48,33 +48,95 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1']
 export default function Relatorios() {
   const [data, setData] = useState<RelatorioData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [filtroAno, setFiltroAno] = useState<string>('2024')
+  const [filtroAno, setFiltroAno] = useState<string>('2025')
   const [tipoRelatorio, setTipoRelatorio] = useState<'mensal' | 'trimestral' | 'anual'>('mensal')
+  const [anosDisponiveis, setAnosDisponiveis] = useState<string[]>(['2025'])
+
+  useEffect(() => {
+    fetchAnosDisponiveis()
+  }, [])
 
   useEffect(() => {
     fetchRelatorioData()
   }, [filtroAno, tipoRelatorio])
 
+  const fetchAnosDisponiveis = async () => {
+    try {
+      const { data: notasData, error } = await supabase
+        .from('saquetto')
+        .select('data_emissao, created_at')
+        .not('data_emissao', 'is', null)
+        
+      if (error) throw error
+      
+      if (notasData) {
+        const anos = new Set<string>()
+        notasData.forEach(nota => {
+          const dataString = nota.data_emissao || nota.created_at
+          if (dataString) {
+            // Extrair o ano da data ISO ou formatada
+            const ano = new Date(dataString).getFullYear().toString()
+            if (!isNaN(parseInt(ano))) {
+              anos.add(ano)
+            }
+          }
+        })
+        
+        const anosOrdenados = Array.from(anos).sort((a, b) => parseInt(b) - parseInt(a))
+        setAnosDisponiveis(anosOrdenados)
+        
+        // Se 2025 não estiver disponível mas houver dados, usar o ano mais recente
+        if (!anosOrdenados.includes('2025') && anosOrdenados.length > 0) {
+          setFiltroAno(anosOrdenados[0])
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar anos disponíveis:', error)
+    }
+  }
+
   const fetchRelatorioData = async () => {
     try {
       setLoading(true)
       
+      console.log('Buscando dados para o ano:', filtroAno)
+      
+      // Buscar dados com filtro mais flexível
       const { data: notasData, error } = await supabase
         .from('saquetto')
         .select('*')
-        .gte('data_emissao', `${filtroAno}-01-01`)
-        .lte('data_emissao', `${filtroAno}-12-31`)
-
+        
       if (error) throw error
 
-      if (!notasData) return
+      if (!notasData) {
+        console.log('Nenhum dado encontrado')
+        return
+      }
+      
+      console.log('Total de registros encontrados:', notasData.length)
+      
+      // Filtrar no cliente por ano
+      const notasFiltradas = notasData.filter(nota => {
+        const dataString = nota.data_emissao || nota.created_at
+        if (!dataString) return false
+        
+        const data = new Date(dataString)
+        const ano = data.getFullYear().toString()
+        return ano === filtroAno
+      })
+      
+      console.log('Registros após filtro por ano:', notasFiltradas.length)
 
       // Faturamento Mensal
       const faturamentoMap = new Map()
-      notasData.forEach(nota => {
-        const data = new Date(nota.data_emissao || nota.created_at)
+      notasFiltradas.forEach(nota => {
+        const dataString = nota.data_emissao || nota.created_at
+        if (!dataString) return
+        
+        const data = new Date(dataString)
         const mesKey = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`
-        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0')
+        const valorString = nota.valor_total_nfe || '0'
+        const valor = parseFloat(valorString.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0
         
         if (faturamentoMap.has(mesKey)) {
           const existing = faturamentoMap.get(mesKey)
@@ -97,10 +159,10 @@ export default function Relatorios() {
 
       // Impostos por Tipo
       const impostos = {
-        ICMS: notasData.reduce((sum, n) => sum + parseFloat(n.icms_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0'), 0),
-        PIS: notasData.reduce((sum, n) => sum + parseFloat(n.pis_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0'), 0),
-        COFINS: notasData.reduce((sum, n) => sum + parseFloat(n.cofins_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0'), 0),
-        IPI: notasData.reduce((sum, n) => sum + parseFloat(n.ipi_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0'), 0)
+        ICMS: notasFiltradas.reduce((sum, n) => sum + (parseFloat(n.icms_valor?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0), 0),
+        PIS: notasFiltradas.reduce((sum, n) => sum + (parseFloat(n.pis_valor?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0), 0),
+        COFINS: notasFiltradas.reduce((sum, n) => sum + (parseFloat(n.cofins_valor?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0), 0),
+        IPI: notasFiltradas.reduce((sum, n) => sum + (parseFloat(n.ipi_valor?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0), 0)
       }
 
       const impostosPorTipo = Object.entries(impostos)
@@ -113,10 +175,10 @@ export default function Relatorios() {
 
       // Top Produtos
       const produtosMap = new Map()
-      notasData.forEach(nota => {
+      notasFiltradas.forEach(nota => {
         const produto = nota.descricao_produto || 'Produto não identificado'
-        const valor = parseFloat(nota.valor_total_produto?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0')
-        const quantidade = parseFloat(nota.quantidade?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '1')
+        const valor = parseFloat(nota.valor_total_produto?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0
+        const quantidade = parseFloat(nota.quantidade?.replace(/[^\d,.-]/g, '').replace(',', '.') || '1') || 1
         
         if (produtosMap.has(produto)) {
           const existing = produtosMap.get(produto)
@@ -140,9 +202,9 @@ export default function Relatorios() {
 
       // Naturezas de Operação
       const naturezasMap = new Map()
-      notasData.forEach(nota => {
+      notasFiltradas.forEach(nota => {
         const natureza = nota.natureza_operacao?.split(' ')[0] || 'OUTROS'
-        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0')
+        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0
         
         if (naturezasMap.has(natureza)) {
           const existing = naturezasMap.get(natureza)
@@ -166,9 +228,9 @@ export default function Relatorios() {
 
       // Status Distribution
       const statusCount = {
-        Aprovado: notasData.filter(n => n.situacao === 'Aprovado').length,
-        Alerta: notasData.filter(n => n.situacao === 'Alerta').length,
-        Reprovado: notasData.filter(n => n.situacao === 'Reprovado').length
+        Aprovado: notasFiltradas.filter(n => n.situacao === 'Aprovado').length,
+        Alerta: notasFiltradas.filter(n => n.situacao === 'Alerta').length,
+        Reprovado: notasFiltradas.filter(n => n.situacao === 'Reprovado').length
       }
 
       const total = Object.values(statusCount).reduce((a, b) => a + b, 0)
@@ -270,9 +332,9 @@ export default function Relatorios() {
               <SelectValue placeholder="Ano" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
+              {anosDisponiveis.map(ano => (
+                <SelectItem key={ano} value={ano}>{ano}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
