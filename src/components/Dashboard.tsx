@@ -367,7 +367,7 @@ export function Dashboard() {
               return (
                 <>
                   {/* Métricas Principais */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
                     <MetricCard
                       title="Total de Notas"
                       value={currentData.totalNotas.toLocaleString()}
@@ -399,18 +399,20 @@ export function Dashboard() {
                   </div>
 
                   {/* Métricas Financeiras */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <MetricCard
-                      title="Valor Total"
-                      value={`R$ ${currentData.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                      icon={DollarSign}
-                      trend={filterType !== 'consolidado' ? `de R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} total` : "+8.5% vs mês anterior"}
-                      variant="primary"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                    <div className="sm:col-span-2 lg:col-span-4">
+                      <MetricCard
+                        title="Valor Total"
+                        value={`R$ ${currentData.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                        icon={DollarSign}
+                        trend={filterType !== 'consolidado' ? `de R$ ${data.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} total` : "+8.5% vs mês anterior"}
+                        variant="primary"
+                      />
+                    </div>
                   </div>
 
                   {/* Tributos */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
                     <MetricCard
                       title="Total ICMS"
                       value={`R$ ${currentData.totalIcms.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
@@ -438,28 +440,36 @@ export function Dashboard() {
                   </div>
 
                   {/* Gráficos */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <StatusChart 
-                      aprovadas={currentData.notasAprovadas} 
-                      reprovadas={currentData.notasReprovadas}
-                      alertas={currentData.notasAlerta}
-                    />
-                    <TaxChart 
-                      icms={currentData.totalIcms}
-                      pis={currentData.totalPis}
-                      cofins={currentData.totalCofins}
-                      ipi={currentData.totalIpi}
-                    />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <div className="w-full">
+                      <StatusChart 
+                        aprovadas={currentData.notasAprovadas} 
+                        reprovadas={currentData.notasReprovadas}
+                        alertas={currentData.notasAlerta}
+                      />
+                    </div>
+                    <div className="w-full">
+                      <TaxChart 
+                        icms={currentData.totalIcms}
+                        pis={currentData.totalPis}
+                        cofins={currentData.totalCofins}
+                        ipi={currentData.totalIpi}
+                      />
+                    </div>
                   </div>
 
                   {/* Operações por Tipo */}
-                  <div className="mb-8">
+                  <div className="mb-6 md:mb-8">
                     <OperationsChart operacoes={currentData.operacoesPorTipo} />
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <TopClientsChart clientes={data.topClientes} />
-                    <MonthlyTrendChart data={data.monthlyData} />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div className="w-full">
+                      <TopClientsChart clientes={data.topClientes} />
+                    </div>
+                    <div className="w-full">
+                      <MonthlyTrendChart data={data.monthlyData} />
+                    </div>
                   </div>
                 </>
               );
