@@ -34,6 +34,11 @@ import {
   Filter
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import RelatorioTabs from '@/components/RelatorioTabs'
+import RelatorioProdutos from '@/components/RelatorioProdutos'
+import RelatorioClientes from '@/components/RelatorioClientes'
+import RelatorioGeografico from '@/components/RelatorioGeografico'
+import RelatorioTendencias from '@/components/RelatorioTendencias'
 
 interface RelatorioData {
   faturamentoMensal: Array<{ mes: string; valor: number; quantidade: number }>
@@ -41,9 +46,12 @@ interface RelatorioData {
   topProdutos: Array<{ produto: string; quantidade: number; valor: number }>
   naturezasOperacao: Array<{ natureza: string; quantidade: number; valor: number }>
   statusDistribuicao: Array<{ status: string; quantidade: number; percentual: number }>
+  topClientes: Array<{ cliente: string; total: number; valor: number }>
+  cidadesEmissao: Array<{ cidade: string; quantidade: number; valor: number }>
+  tendenciasSemanal: Array<{ semana: string; quantidade: number; valor: number }>
 }
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1']
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent-2))', 'hsl(var(--accent-3))', 'hsl(var(--accent-4))', 'hsl(var(--accent-5))']
 
 export default function Relatorios() {
   const [data, setData] = useState<RelatorioData | null>(null)
@@ -240,12 +248,103 @@ export default function Relatorios() {
         percentual: total > 0 ? (quantidade / total) * 100 : 0
       }))
 
+      // Top Clientes por Valor
+      const clientesMap = new Map()
+      notasFiltradas.forEach(nota => {
+        const cliente = nota.destinatario_razao_social || nota.emitente_razao_social || 'Cliente não identificado'
+        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0
+        
+        if (clientesMap.has(cliente)) {
+          const existing = clientesMap.get(cliente)
+          clientesMap.set(cliente, {
+            total: existing.total + 1,
+            valor: existing.valor + valor
+          })
+        } else {
+          clientesMap.set(cliente, { total: 1, valor })
+        }
+      })
+
+      const topClientes = Array.from(clientesMap.entries())
+        .map(([cliente, stats]) => ({
+          cliente: cliente.substring(0, 50) + (cliente.length > 50 ? '...' : ''),
+          total: stats.total,
+          valor: stats.valor
+        }))
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, 10)
+
+      // Cidades que mais emitem notas
+      const cidadesMap = new Map()
+      notasFiltradas.forEach(nota => {
+        const endereco = nota.emitente_endereco || ''
+        // Extrair cidade do endereço usando regex
+        const cidadeMatch = endereco.match(/([A-ZÁÊÔÇÀÚÍ\s]+)\s*-\s*[A-Z]{2}/)
+        const cidade = cidadeMatch ? cidadeMatch[1].trim() : 'Cidade não identificada'
+        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0
+        
+        if (cidadesMap.has(cidade)) {
+          const existing = cidadesMap.get(cidade)
+          cidadesMap.set(cidade, {
+            quantidade: existing.quantidade + 1,
+            valor: existing.valor + valor
+          })
+        } else {
+          cidadesMap.set(cidade, { quantidade: 1, valor })
+        }
+      })
+
+      const cidadesEmissao = Array.from(cidadesMap.entries())
+        .map(([cidade, stats]) => ({
+          cidade,
+          quantidade: stats.quantidade,
+          valor: stats.valor
+        }))
+        .sort((a, b) => b.quantidade - a.quantidade)
+        .slice(0, 5)
+
+      // Tendências Semanais (últimas 12 semanas)
+      const semanasMap = new Map()
+      notasFiltradas.forEach(nota => {
+        const dataString = nota.data_emissao || nota.created_at
+        if (!dataString) return
+        
+        const data = new Date(dataString)
+        const inicioSemana = new Date(data)
+        inicioSemana.setDate(data.getDate() - data.getDay())
+        
+        const semanaKey = inicioSemana.toISOString().split('T')[0]
+        const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '').replace(',', '.') || '0') || 0
+        
+        if (semanasMap.has(semanaKey)) {
+          const existing = semanasMap.get(semanaKey)
+          semanasMap.set(semanaKey, {
+            quantidade: existing.quantidade + 1,
+            valor: existing.valor + valor
+          })
+        } else {
+          semanasMap.set(semanaKey, { quantidade: 1, valor })
+        }
+      })
+
+      const tendenciasSemanal = Array.from(semanasMap.entries())
+        .map(([semana, stats]) => ({
+          semana: new Date(semana).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+          quantidade: stats.quantidade,
+          valor: stats.valor
+        }))
+        .sort((a, b) => a.semana.localeCompare(b.semana))
+        .slice(-12) // Últimas 12 semanas
+
       setData({
         faturamentoMensal,
         impostosPorTipo,
         topProdutos,
         naturezasOperacao,
-        statusDistribuicao
+        statusDistribuicao,
+        topClientes,
+        cidadesEmissao,
+        tendenciasSemanal
       })
 
     } catch (error) {
@@ -357,191 +456,180 @@ export default function Relatorios() {
       </div>
 
       {data && (
-        <div className="space-y-6">
-          {/* Métricas Principais */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(data.faturamentoMensal.reduce((acc, item) => acc + item.valor, 0))}
+        <RelatorioTabs 
+          data={data} 
+          formatCurrency={formatCurrency}
+        >
+          {{
+            visaoGeral: (
+              <div className="space-y-6">
+                {/* Métricas Principais */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {formatCurrency(data.faturamentoMensal.reduce((acc, item) => acc + item.valor, 0))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {data.faturamentoMensal.reduce((acc, item) => acc + item.quantidade, 0)} notas processadas
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Impostos</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {formatCurrency(data.impostosPorTipo.reduce((acc, item) => acc + item.valor, 0))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        ICMS, PIS, COFINS e IPI
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Taxa Aprovação</CardTitle>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {data.statusDistribuicao.find(s => s.status === 'Aprovado')?.percentual.toFixed(1) || 0}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Notas aprovadas
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {data.topProdutos.length}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Produtos diferentes movimentados
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {data.faturamentoMensal.reduce((acc, item) => acc + item.quantidade, 0)} notas processadas
-                </p>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Impostos</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(data.impostosPorTipo.reduce((acc, item) => acc + item.valor, 0))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  ICMS, PIS, COFINS e IPI
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Taxa Aprovação</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {data.statusDistribuicao.find(s => s.status === 'Aprovado')?.percentual.toFixed(1) || 0}%
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Notas aprovadas
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {data.topProdutos.length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Produtos diferentes movimentados
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Gráfico de Faturamento Mensal */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Faturamento Mensal</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.faturamentoMensal}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
-                    labelFormatter={(label) => `Mês: ${label}`}
-                  />
-                  <Bar dataKey="valor" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Gráficos de Pizza - Impostos e Status */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuição de Impostos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={data.impostosPorTipo}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ tipo, valor }) => `${tipo}: ${formatCurrency(valor)}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="valor"
-                    >
-                      {data.impostosPorTipo.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.cor} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Status das Notas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {data.statusDistribuicao.map((item, index) => (
-                    <div key={item.status} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded" 
-                          style={{ backgroundColor: COLORS[index] }}
+                {/* Gráfico de Faturamento Mensal */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Faturamento Mensal</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={data.faturamentoMensal}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="mes" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
+                          labelFormatter={(label) => `Mês: ${label}`}
                         />
-                        <span className="font-medium">{item.status}</span>
+                        <Bar dataKey="valor" fill="hsl(var(--primary))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Gráficos de Pizza - Impostos e Status */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Distribuição de Impostos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={data.impostosPorTipo}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ tipo, valor }) => `${tipo}: ${formatCurrency(valor)}`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="valor"
+                          >
+                            {data.impostosPorTipo.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.cor} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Status das Notas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {data.statusDistribuicao.map((item, index) => (
+                          <div key={item.status} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-4 h-4 rounded" 
+                                style={{ backgroundColor: COLORS[index] }}
+                              />
+                              <span className="text-sm font-medium">{item.status}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold">{item.quantidade}</div>
+                              <div className="text-xs text-muted-foreground">{item.percentual.toFixed(1)}%</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold">{item.quantidade}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {item.percentual.toFixed(1)}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Top Produtos */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Top 10 Produtos por Valor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.topProdutos} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="produto" type="category" width={120} />
-                  <Tooltip 
-                    formatter={(value) => [formatCurrency(Number(value)), 'Valor']}
-                  />
-                  <Bar dataKey="valor" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Naturezas de Operação */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Operações por Natureza</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.naturezasOperacao}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="natureza" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value, name) => [
-                      name === 'valor' ? formatCurrency(Number(value)) : value,
-                      name === 'valor' ? 'Valor' : 'Quantidade'
-                    ]}
-                  />
-                  <Bar dataKey="quantidade" fill="#ffc658" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            ),
+            produtos: (
+              <RelatorioProdutos 
+                produtos={data.topProdutos} 
+                formatCurrency={formatCurrency} 
+              />
+            ),
+            clientes: (
+              <RelatorioClientes 
+                clientes={data.topClientes} 
+                formatCurrency={formatCurrency} 
+              />
+            ),
+            geografico: (
+              <RelatorioGeografico 
+                cidades={data.cidadesEmissao} 
+                formatCurrency={formatCurrency} 
+              />
+            ),
+            tendencias: (
+              <RelatorioTendencias 
+                tendenciasSemanal={data.tendenciasSemanal}
+                faturamentoMensal={data.faturamentoMensal}
+                formatCurrency={formatCurrency} 
+              />
+            )
+          }}
+        </RelatorioTabs>
       )}
     </div>
   )
