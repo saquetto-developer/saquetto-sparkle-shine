@@ -9,8 +9,9 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
 import DashboardPage from "./pages/DashboardPage";
 import Clientes from "./pages/Clientes";
+import Fornecedores from "./pages/Fornecedores";
 import NotasFiscais from "./pages/NotasFiscais";
-import ErrosAlertas from "./pages/ErrosAlertas";
+import Relatorios from "./pages/Relatorios";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -47,10 +48,17 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               } />
-              <Route path="/erros-alertas" element={
+              <Route path="/fornecedores" element={
                 <ProtectedRoute>
                   <Layout>
-                    <ErrosAlertas />
+                    <Fornecedores />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/relatorios" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Relatorios />
                   </Layout>
                 </ProtectedRoute>
               } />

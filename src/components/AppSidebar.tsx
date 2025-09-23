@@ -3,7 +3,8 @@ import {
   BarChart3, 
   Users, 
   FileText, 
-  AlertTriangle,
+  Building2,
+  ChartLine,
   ChevronLeft,
   ChevronRight,
   Bot,
@@ -18,9 +19,10 @@ import saquettoLogo from "@/assets/saquetto-logo.png"
 
 const navigation = [
   { title: "Dashboard", url: "/", icon: BarChart3 },
-  { title: "Clientes", url: "/clientes", icon: Users },
   { title: "Notas Fiscais", url: "/notas-fiscais", icon: FileText },
-  { title: "Erros e Alertas", url: "/erros-alertas", icon: AlertTriangle },
+  { title: "Clientes", url: "/clientes", icon: Users },
+  { title: "Fornecedores", url: "/fornecedores", icon: Building2 },
+  { title: "Relatórios", url: "/relatorios", icon: ChartLine },
 ]
 
 export function AppSidebar() {

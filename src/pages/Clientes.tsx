@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { 
   Table, 
   TableBody, 
   TableCell, 
@@ -20,17 +27,23 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Search, Users, FileText, DollarSign, AlertCircle } from 'lucide-react'
+import { Search, Users, FileText, DollarSign, AlertCircle, MapPin, Phone, Mail, TrendingUp, Building } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
 interface Cliente {
-  destinatario_razao_social: string
-  destinatario_cnpj: string
+  razao_social: string
+  cnpj: string
+  endereco: string
+  telefone: string
+  email: string
   total_notas: number
   valor_total: number
   notas_aprovadas: number
-  notas_alertas?: number
+  notas_alertas: number
   notas_reprovadas: number
+  ultima_compra: string
+  produtos_principais: string[]
+  ticket_medio: number
   status: 'ok' | 'com_alertas' | 'erro'
 }
 
@@ -49,6 +62,8 @@ export default function Clientes() {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
   const [notasCliente, setNotasCliente] = useState<NotaCliente[]>([])
   const [loadingNotas, setLoadingNotas] = useState(false)
+  const [sortBy, setSortBy] = useState<'nome' | 'valor' | 'notas'>('valor')
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'ok' | 'com_alertas' | 'erro'>('todos')
 
   useEffect(() => {
     fetchClientes()
@@ -58,51 +73,111 @@ export default function Clientes() {
     try {
       const { data, error } = await supabase
         .from('saquetto')
-        .select(`
-          destinatario_razao_social,
-          destinatario_cnpj,
-          numero_nfe,
-          valor_total_nfe,
-          situacao
-        `)
+        .select('*')
         .not('destinatario_razao_social', 'is', null)
+        .eq('emitente_saquetto', true) // Apenas vendas da Saquetto
 
       if (error) throw error
 
       // Agrupar por cliente
-      const clientesMap = new Map<string, Cliente>()
-      
-      data?.forEach((nota) => {
-        const key = nota.destinatario_cnpj || nota.destinatario_razao_social
-        if (!clientesMap.has(key)) {
-          clientesMap.set(key, {
-            destinatario_razao_social: nota.destinatario_razao_social,
-            destinatario_cnpj: nota.destinatario_cnpj,
-            total_notas: 0,
-            valor_total: 0,
-            notas_aprovadas: 0,
-            notas_alertas: 0,
-            notas_reprovadas: 0,
-            status: 'ok'
-          })
-        }
+      const clientesMap = new Map<string, {
+        razao_social: string
+        cnpj: string
+        endereco: string
+        telefone: string
+        email: string
+        notas: any[]
+        valor_total: number
+        notas_aprovadas: number
+        notas_alertas: number
+        notas_reprovadas: number
+        ultima_compra: string
+        produtos: Set<string>
+        status: 'ok' | 'com_alertas' | 'erro'
+      }>()
 
-        const cliente = clientesMap.get(key)!
-        cliente.total_notas++
-        cliente.valor_total += parseFloat(nota.valor_total_nfe || '0')
-        
-        if (nota.situacao === 'Aprovado') {
-          cliente.notas_aprovadas++
-        } else if (nota.situacao === 'Alerta') {
-          cliente.notas_alertas = (cliente.notas_alertas || 0) + 1
-          cliente.status = 'com_alertas'
-        } else if (nota.situacao === 'Reprovado') {
-          cliente.notas_reprovadas++
-          cliente.status = 'erro'
+      data?.forEach(nota => {
+        const key = nota.destinatario_cnpj || nota.destinatario_razao_social
+        if (!key) return
+
+        if (clientesMap.has(key)) {
+          const existing = clientesMap.get(key)!
+          existing.notas.push(nota)
+          existing.valor_total += parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0')
+          
+          if (nota.descricao_produto) {
+            existing.produtos.add(nota.descricao_produto)
+          }
+          
+          // Atualizar última compra se for mais recente
+          if (new Date(nota.data_emissao) > new Date(existing.ultima_compra)) {
+            existing.ultima_compra = nota.data_emissao
+          }
+
+          // Contar por status
+          if (nota.situacao === 'Aprovado') {
+            existing.notas_aprovadas++
+          } else if (nota.situacao === 'Alerta') {
+            existing.notas_alertas++
+            existing.status = 'com_alertas'
+          } else if (nota.situacao === 'Reprovado') {
+            existing.notas_reprovadas++
+            existing.status = 'erro'
+          }
+        } else {
+          const produtos = new Set<string>()
+          if (nota.descricao_produto) produtos.add(nota.descricao_produto)
+          
+          let status: 'ok' | 'com_alertas' | 'erro' = 'ok'
+          let notas_aprovadas = 0, notas_alertas = 0, notas_reprovadas = 0
+          
+          if (nota.situacao === 'Aprovado') {
+            notas_aprovadas = 1
+          } else if (nota.situacao === 'Alerta') {
+            notas_alertas = 1
+            status = 'com_alertas'
+          } else if (nota.situacao === 'Reprovado') {
+            notas_reprovadas = 1
+            status = 'erro'
+          }
+          
+          clientesMap.set(key, {
+            razao_social: nota.destinatario_razao_social || 'Cliente não identificado',
+            cnpj: nota.destinatario_cnpj || 'Não informado',
+            endereco: nota.destinatario_endereco || 'Não informado',
+            telefone: nota.destinatario_telefone || 'Não informado',
+            email: nota.destinatario_email || 'Não informado',
+            notas: [nota],
+            valor_total: parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0'),
+            notas_aprovadas,
+            notas_alertas,
+            notas_reprovadas,
+            ultima_compra: nota.data_emissao || nota.created_at,
+            produtos,
+            status
+          })
         }
       })
 
-      setClientes(Array.from(clientesMap.values()))
+      // Converter para array
+      const clientesList: Cliente[] = Array.from(clientesMap.values()).map(c => ({
+        razao_social: c.razao_social,
+        cnpj: c.cnpj,
+        endereco: c.endereco,
+        telefone: c.telefone,
+        email: c.email,
+        total_notas: c.notas.length,
+        valor_total: c.valor_total,
+        notas_aprovadas: c.notas_aprovadas,
+        notas_alertas: c.notas_alertas,
+        notas_reprovadas: c.notas_reprovadas,
+        ultima_compra: c.ultima_compra,
+        produtos_principais: Array.from(c.produtos).slice(0, 5),
+        ticket_medio: c.valor_total / c.notas.length,
+        status: c.status
+      }))
+
+      setClientes(clientesList)
     } catch (error) {
       console.error('Erro ao buscar clientes:', error)
       toast({
@@ -127,7 +202,7 @@ export default function Clientes() {
           situacao,
           natureza_operacao
         `)
-        .or(`destinatario_cnpj.eq.${cliente.destinatario_cnpj},destinatario_razao_social.eq.${cliente.destinatario_razao_social}`)
+        .or(`destinatario_cnpj.eq.${cliente.cnpj},destinatario_razao_social.eq.${cliente.razao_social}`)
         .order('data_emissao', { ascending: false })
 
       if (error) throw error
@@ -145,10 +220,25 @@ export default function Clientes() {
     }
   }
 
-  const filteredClientes = clientes.filter(cliente =>
-    cliente.destinatario_razao_social?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.destinatario_cnpj?.includes(searchTerm)
-  )
+  const filteredClientes = clientes
+    .filter(cliente => {
+      const matchesSearch = cliente.razao_social?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cliente.cnpj?.includes(searchTerm)
+      const matchesStatus = statusFilter === 'todos' || cliente.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'nome':
+          return a.razao_social.localeCompare(b.razao_social)
+        case 'valor':
+          return b.valor_total - a.valor_total
+        case 'notas':
+          return b.total_notas - a.total_notas
+        default:
+          return 0
+      }
+    })
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -178,12 +268,12 @@ export default function Clientes() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Clientes</h1>
         <p className="text-muted-foreground">
-          Gerencie e visualize informações dos seus clientes
+          Gerencie seus clientes e analise o histórico de vendas
         </p>
       </div>
 
-      {/* Search */}
-      <div className="mb-6">
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -192,6 +282,31 @@ export default function Clientes() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
+        </div>
+
+        <div className="flex gap-4">
+          <Select value={sortBy} onValueChange={(value: 'nome' | 'valor' | 'notas') => setSortBy(value)}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="valor">Maior faturamento</SelectItem>
+              <SelectItem value="notas">Mais compras</SelectItem>
+              <SelectItem value="nome">Nome A-Z</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={(value: 'todos' | 'ok' | 'com_alertas' | 'erro') => setStatusFilter(value)}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os status</SelectItem>
+              <SelectItem value="ok">Apenas OK</SelectItem>
+              <SelectItem value="com_alertas">Com alertas</SelectItem>
+              <SelectItem value="erro">Com erros</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -203,7 +318,7 @@ export default function Clientes() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{clientes.length}</div>
+            <div className="text-2xl font-bold">{filteredClientes.length}</div>
           </CardContent>
         </Card>
         
@@ -214,7 +329,7 @@ export default function Clientes() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              {clientes.filter(c => c.status === 'ok').length}
+              {filteredClientes.filter(c => c.status === 'ok').length}
             </div>
           </CardContent>
         </Card>
@@ -226,7 +341,7 @@ export default function Clientes() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">
-              {clientes.filter(c => c.status === 'com_alertas').length}
+              {filteredClientes.filter(c => c.status === 'com_alertas').length}
             </div>
           </CardContent>
         </Card>
@@ -238,19 +353,19 @@ export default function Clientes() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              {clientes.filter(c => c.status === 'erro').length}
+              {filteredClientes.filter(c => c.status === 'erro').length}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Faturado</CardTitle>
+            <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(clientes.reduce((acc, c) => acc + c.valor_total, 0))}
+              {formatCurrency(filteredClientes.reduce((acc, c) => acc + c.valor_total, 0))}
             </div>
           </CardContent>
         </Card>
@@ -268,19 +383,20 @@ export default function Clientes() {
                 <TableHead>Cliente</TableHead>
                 <TableHead>CNPJ</TableHead>
                 <TableHead>Total Notas</TableHead>
-                <TableHead>Valor Total</TableHead>
+                <TableHead>Faturamento</TableHead>
+                <TableHead>Ticket Médio</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClientes.map((cliente, index) => (
+              {filteredClientes.slice(0, 50).map((cliente, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">
-                    {cliente.destinatario_razao_social || 'N/A'}
+                  <TableCell className="font-medium max-w-xs truncate">
+                    {cliente.razao_social || 'N/A'}
                   </TableCell>
-                  <TableCell>
-                    {cliente.destinatario_cnpj || 'N/A'}
+                  <TableCell className="font-mono text-sm">
+                    {cliente.cnpj || 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
@@ -288,8 +404,11 @@ export default function Clientes() {
                       <span>{cliente.total_notas}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium">
                     {formatCurrency(cliente.valor_total)}
+                  </TableCell>
+                  <TableCell>
+                    {formatCurrency(cliente.ticket_medio)}
                   </TableCell>
                   <TableCell>
                     <Badge 
@@ -317,64 +436,140 @@ export default function Clientes() {
                             fetchNotasCliente(cliente)
                           }}
                         >
-                          Ver Notas
+                          Detalhes
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>
-                            Notas Fiscais - {selectedCliente?.destinatario_razao_social}
+                            Perfil do Cliente - {selectedCliente?.razao_social}
                           </DialogTitle>
                         </DialogHeader>
-                        {loadingNotas ? (
-                          <div className="space-y-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Skeleton key={i} className="h-12 w-full" />
-                            ))}
+                        {selectedCliente && (
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h3 className="font-semibold mb-2">Informações Básicas</h3>
+                                <div className="space-y-2 text-sm">
+                                  <div><span className="font-medium">Razão Social:</span> {selectedCliente.razao_social}</div>
+                                  <div><span className="font-medium">CNPJ:</span> {selectedCliente.cnpj}</div>
+                                  <div><span className="font-medium">Total de Compras:</span> {selectedCliente.total_notas}</div>
+                                  <div><span className="font-medium">Faturamento Total:</span> {formatCurrency(selectedCliente.valor_total)}</div>
+                                  <div><span className="font-medium">Ticket Médio:</span> {formatCurrency(selectedCliente.ticket_medio)}</div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <h3 className="font-semibold mb-2">Contato</h3>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4" />
+                                    <span className="text-xs break-all">{selectedCliente.endereco}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{selectedCliente.telefone}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Mail className="h-4 w-4" />
+                                    <span className="text-xs break-all">{selectedCliente.email}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="font-semibold mb-2">Principais Produtos Comprados</h3>
+                              <div className="flex flex-wrap gap-2">
+                                {selectedCliente.produtos_principais.map((produto, idx) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {produto.substring(0, 30)}{produto.length > 30 ? '...' : ''}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+                              <div className="text-center">
+                                <div className="text-xl font-bold text-success">
+                                  {selectedCliente.notas_aprovadas}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Aprovadas</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xl font-bold text-warning">
+                                  {selectedCliente.notas_alertas}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Alertas</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xl font-bold text-destructive">
+                                  {selectedCliente.notas_reprovadas}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Reprovadas</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xl font-bold text-primary">
+                                  {formatCurrency(selectedCliente.ticket_medio)}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Ticket médio</div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="font-semibold mb-2">Histórico de Notas Fiscais</h3>
+                              {loadingNotas ? (
+                                <div className="space-y-2">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Skeleton key={i} className="h-12 w-full" />
+                                  ))}
+                                </div>
+                              ) : (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Número</TableHead>
+                                      <TableHead>Data</TableHead>
+                                      <TableHead>Valor</TableHead>
+                                      <TableHead>Operação</TableHead>
+                                      <TableHead>Status</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {notasCliente.slice(0, 10).map((nota, idx) => (
+                                      <TableRow key={idx}>
+                                        <TableCell className="font-mono text-sm">
+                                          {nota.numero_nfe}
+                                        </TableCell>
+                                        <TableCell>
+                                          {nota.data_emissao ? new Date(nota.data_emissao).toLocaleDateString('pt-BR') : 'N/A'}
+                                        </TableCell>
+                                        <TableCell>
+                                          {formatCurrency(parseFloat(nota.valor_total_nfe || '0'))}
+                                        </TableCell>
+                                        <TableCell className="max-w-xs truncate">
+                                          {nota.natureza_operacao}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge 
+                                            variant={
+                                              nota.situacao === 'Aprovado' ? 'default' : 
+                                              nota.situacao === 'Alerta' ? 'secondary' : 
+                                              'destructive'
+                                            }
+                                            className={
+                                              nota.situacao === 'Alerta' ? 'bg-warning/10 text-warning border-warning/20' : ''
+                                            }>
+                                            {nota.situacao}
+                                          </Badge>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Número</TableHead>
-                                <TableHead>Data</TableHead>
-                                <TableHead>Valor</TableHead>
-                                <TableHead>Operação</TableHead>
-                                <TableHead>Status</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {notasCliente.map((nota, idx) => (
-                                <TableRow key={idx}>
-                                  <TableCell className="font-mono">
-                                    {nota.numero_nfe}
-                                  </TableCell>
-                                  <TableCell>
-                                    {nota.data_emissao ? new Date(nota.data_emissao).toLocaleDateString('pt-BR') : 'N/A'}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatCurrency(parseFloat(nota.valor_total_nfe || '0'))}
-                                  </TableCell>
-                                  <TableCell>
-                                    {nota.natureza_operacao}
-                                  </TableCell>
-                                   <TableCell>
-                                     <Badge 
-                                       variant={
-                                         nota.situacao === 'Aprovado' ? 'default' : 
-                                         nota.situacao === 'Alerta' ? 'secondary' : 
-                                         'destructive'
-                                       }
-                                       className={
-                                         nota.situacao === 'Alerta' ? 'bg-warning/10 text-warning border-warning/20' : ''
-                                       }>
-                                       {nota.situacao}
-                                     </Badge>
-                                   </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
                         )}
                       </DialogContent>
                     </Dialog>
@@ -383,6 +578,11 @@ export default function Clientes() {
               ))}
             </TableBody>
           </Table>
+          {filteredClientes.length > 50 && (
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              Mostrando 50 de {filteredClientes.length} clientes. Use os filtros para refinar.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
