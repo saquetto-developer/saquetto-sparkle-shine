@@ -10,397 +10,10 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      Attivar: {
-        Row: {
-          base64_image: string | null
-          canal_origem: string | null
-          cargo: string | null
-          created_at: string
-          data_entrada: string | null
-          data_image: string | null
-          empresa: string | null
-          etapa_funil: string | null
-          funil_atualizado: boolean | null
-          id: number
-          id_deal_AGENDOR: number | null
-          id_empresa_AGENDOR: number | null
-          id_pessoas_AGENDOR: number | null
-          interação_completa: boolean | null
-          nome: string | null
-          observacoes: string | null
-          orcamento_aprovado: string | null
-          personalizacao: string | null
-          possui_logo: string | null
-          prazo_entrega: string | null
-          precisa_design: string | null
-          quantidade_pecas: string | null
-          segmento: string | null
-          status: string | null
-          tecidos_desejados: string | null
-          tipo_uniforme: string | null
-          ultima_interacao: string | null
-          url_image: string | null
-          whatsapp: string | null
-        }
-        Insert: {
-          base64_image?: string | null
-          canal_origem?: string | null
-          cargo?: string | null
-          created_at?: string
-          data_entrada?: string | null
-          data_image?: string | null
-          empresa?: string | null
-          etapa_funil?: string | null
-          funil_atualizado?: boolean | null
-          id?: number
-          id_deal_AGENDOR?: number | null
-          id_empresa_AGENDOR?: number | null
-          id_pessoas_AGENDOR?: number | null
-          interação_completa?: boolean | null
-          nome?: string | null
-          observacoes?: string | null
-          orcamento_aprovado?: string | null
-          personalizacao?: string | null
-          possui_logo?: string | null
-          prazo_entrega?: string | null
-          precisa_design?: string | null
-          quantidade_pecas?: string | null
-          segmento?: string | null
-          status?: string | null
-          tecidos_desejados?: string | null
-          tipo_uniforme?: string | null
-          ultima_interacao?: string | null
-          url_image?: string | null
-          whatsapp?: string | null
-        }
-        Update: {
-          base64_image?: string | null
-          canal_origem?: string | null
-          cargo?: string | null
-          created_at?: string
-          data_entrada?: string | null
-          data_image?: string | null
-          empresa?: string | null
-          etapa_funil?: string | null
-          funil_atualizado?: boolean | null
-          id?: number
-          id_deal_AGENDOR?: number | null
-          id_empresa_AGENDOR?: number | null
-          id_pessoas_AGENDOR?: number | null
-          interação_completa?: boolean | null
-          nome?: string | null
-          observacoes?: string | null
-          orcamento_aprovado?: string | null
-          personalizacao?: string | null
-          possui_logo?: string | null
-          prazo_entrega?: string | null
-          precisa_design?: string | null
-          quantidade_pecas?: string | null
-          segmento?: string | null
-          status?: string | null
-          tecidos_desejados?: string | null
-          tipo_uniforme?: string | null
-          ultima_interacao?: string | null
-          url_image?: string | null
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
-      Attivar_follow_up: {
-        Row: {
-          atualização: string | null
-          created_at: string
-          data: string | null
-          Data_contato: string | null
-          email: string | null
-          empresa: string | null
-          id: number
-          nome_cliente: string | null
-          qtd_peças: number | null
-          row_number: number | null
-          telefone: number | null
-        }
-        Insert: {
-          atualização?: string | null
-          created_at?: string
-          data?: string | null
-          Data_contato?: string | null
-          email?: string | null
-          empresa?: string | null
-          id?: number
-          nome_cliente?: string | null
-          qtd_peças?: number | null
-          row_number?: number | null
-          telefone?: number | null
-        }
-        Update: {
-          atualização?: string | null
-          created_at?: string
-          data?: string | null
-          Data_contato?: string | null
-          email?: string | null
-          empresa?: string | null
-          id?: number
-          nome_cliente?: string | null
-          qtd_peças?: number | null
-          row_number?: number | null
-          telefone?: number | null
-        }
-        Relationships: []
-      }
-      barbara_dias_SDR: {
-        Row: {
-          created_at: string
-          etapa_funil: string | null
-          id: number
-          link_de_midia: string | null
-          nome: string | null
-          numero: string | null
-          prova_social_enviada: boolean | null
-          situacao_lead: string | null
-          ultima_mensagem: string | null
-        }
-        Insert: {
-          created_at?: string
-          etapa_funil?: string | null
-          id?: number
-          link_de_midia?: string | null
-          nome?: string | null
-          numero?: string | null
-          prova_social_enviada?: boolean | null
-          situacao_lead?: string | null
-          ultima_mensagem?: string | null
-        }
-        Update: {
-          created_at?: string
-          etapa_funil?: string | null
-          id?: number
-          link_de_midia?: string | null
-          nome?: string | null
-          numero?: string | null
-          prova_social_enviada?: boolean | null
-          situacao_lead?: string | null
-          ultima_mensagem?: string | null
-        }
-        Relationships: []
-      }
-      cliente_rom_seguros: {
-        Row: {
-          cliente_retornou: boolean | null
-          cotacao: string | null
-          cotacao_enviada: boolean | null
-          Cotação_espera: string | null
-          created_at: string | null
-          data_contato: string | null
-          "e-mail": string | null
-          empresa: string | null
-          IAstop: boolean | null
-          id: number
-          nome: string | null
-          placa: string | null
-          RDIDContato: string | null
-          RecusouCotacao: string | null
-          seguradora: string | null
-          status: string | null
-          tentativa_contato: number | null
-          vencimento: string | null
-          whatsapp: string | null
-        }
-        Insert: {
-          cliente_retornou?: boolean | null
-          cotacao?: string | null
-          cotacao_enviada?: boolean | null
-          Cotação_espera?: string | null
-          created_at?: string | null
-          data_contato?: string | null
-          "e-mail"?: string | null
-          empresa?: string | null
-          IAstop?: boolean | null
-          id?: number
-          nome?: string | null
-          placa?: string | null
-          RDIDContato?: string | null
-          RecusouCotacao?: string | null
-          seguradora?: string | null
-          status?: string | null
-          tentativa_contato?: number | null
-          vencimento?: string | null
-          whatsapp?: string | null
-        }
-        Update: {
-          cliente_retornou?: boolean | null
-          cotacao?: string | null
-          cotacao_enviada?: boolean | null
-          Cotação_espera?: string | null
-          created_at?: string | null
-          data_contato?: string | null
-          "e-mail"?: string | null
-          empresa?: string | null
-          IAstop?: boolean | null
-          id?: number
-          nome?: string | null
-          placa?: string | null
-          RDIDContato?: string | null
-          RecusouCotacao?: string | null
-          seguradora?: string | null
-          status?: string | null
-          tentativa_contato?: number | null
-          vencimento?: string | null
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
-      cliente_romseguros_cotacoes_pdf: {
-        Row: {
-          alterado_por: string | null
-          apolice: string | null
-          celular: string | null
-          cnpj: string | null
-          cobertura: string | null
-          cotacao_enviada: boolean | null
-          criado_em: string | null
-          criado_por: string | null
-          data_envio: string | null
-          email: string | null
-          forma_pagamento: string | null
-          franquia: string | null
-          id: string
-          impresso_em: string | null
-          iof: string | null
-          legislacao: string | null
-          limite_indenizacao: string | null
-          NomeArquivo: string | null
-          num_passageiros: string | null
-          num_tripulantes: string | null
-          numero_cotacao: string | null
-          parcelas: number | null
-          placa: string | null
-          premio_liquido: string | null
-          premio_total: string | null
-          razao_social: string | null
-          regiao_origem_risco: string | null
-          renovacao: string | null
-          seguradora: string | null
-          tipo_carroceria: string | null
-          tipo_seguro: string | null
-          utilizacao: string | null
-          validade: string | null
-          vigencia_fim: string | null
-          vigencia_inicio: string | null
-        }
-        Insert: {
-          alterado_por?: string | null
-          apolice?: string | null
-          celular?: string | null
-          cnpj?: string | null
-          cobertura?: string | null
-          cotacao_enviada?: boolean | null
-          criado_em?: string | null
-          criado_por?: string | null
-          data_envio?: string | null
-          email?: string | null
-          forma_pagamento?: string | null
-          franquia?: string | null
-          id?: string
-          impresso_em?: string | null
-          iof?: string | null
-          legislacao?: string | null
-          limite_indenizacao?: string | null
-          NomeArquivo?: string | null
-          num_passageiros?: string | null
-          num_tripulantes?: string | null
-          numero_cotacao?: string | null
-          parcelas?: number | null
-          placa?: string | null
-          premio_liquido?: string | null
-          premio_total?: string | null
-          razao_social?: string | null
-          regiao_origem_risco?: string | null
-          renovacao?: string | null
-          seguradora?: string | null
-          tipo_carroceria?: string | null
-          tipo_seguro?: string | null
-          utilizacao?: string | null
-          validade?: string | null
-          vigencia_fim?: string | null
-          vigencia_inicio?: string | null
-        }
-        Update: {
-          alterado_por?: string | null
-          apolice?: string | null
-          celular?: string | null
-          cnpj?: string | null
-          cobertura?: string | null
-          cotacao_enviada?: boolean | null
-          criado_em?: string | null
-          criado_por?: string | null
-          data_envio?: string | null
-          email?: string | null
-          forma_pagamento?: string | null
-          franquia?: string | null
-          id?: string
-          impresso_em?: string | null
-          iof?: string | null
-          legislacao?: string | null
-          limite_indenizacao?: string | null
-          NomeArquivo?: string | null
-          num_passageiros?: string | null
-          num_tripulantes?: string | null
-          numero_cotacao?: string | null
-          parcelas?: number | null
-          placa?: string | null
-          premio_liquido?: string | null
-          premio_total?: string | null
-          razao_social?: string | null
-          regiao_origem_risco?: string | null
-          renovacao?: string | null
-          seguradora?: string | null
-          tipo_carroceria?: string | null
-          tipo_seguro?: string | null
-          utilizacao?: string | null
-          validade?: string | null
-          vigencia_fim?: string | null
-          vigencia_inicio?: string | null
-        }
-        Relationships: []
-      }
-      CPDC_SDR: {
-        Row: {
-          agendado: boolean | null
-          created_at: string
-          data_agendamento: string | null
-          etapa_funil: string | null
-          id: number
-          nome: string | null
-          numero: string | null
-          ultima_mensagem: string | null
-        }
-        Insert: {
-          agendado?: boolean | null
-          created_at?: string
-          data_agendamento?: string | null
-          etapa_funil?: string | null
-          id?: number
-          nome?: string | null
-          numero?: string | null
-          ultima_mensagem?: string | null
-        }
-        Update: {
-          agendado?: boolean | null
-          created_at?: string
-          data_agendamento?: string | null
-          etapa_funil?: string | null
-          id?: number
-          nome?: string | null
-          numero?: string | null
-          ultima_mensagem?: string | null
-        }
-        Relationships: []
-      }
       documents: {
         Row: {
           content: string | null
@@ -422,177 +35,30 @@ export type Database = {
         }
         Relationships: []
       }
-      Gisele: {
-        Row: {
-          atualização: string | null
-          cliente_retornou: boolean | null
-          "Contato realizado": string | null
-          created_at: string
-          data: string | null
-          data_forms: string | null
-          "e-mail": string | null
-          IAStop: boolean | null
-          id_row: number
-          Intereacao_completa: boolean | null
-          mensagem_inicial_enviada: boolean | null
-          name: string | null
-          "nome e sobrenome": string | null
-          "renda-mensal": string | null
-          tentativas_follow_up: number | null
-          tentativas_followup: number | null
-          "trabalho-atual": string | null
-          ultima_mensagem: string | null
-          whatsapp: string | null
-        }
-        Insert: {
-          atualização?: string | null
-          cliente_retornou?: boolean | null
-          "Contato realizado"?: string | null
-          created_at?: string
-          data?: string | null
-          data_forms?: string | null
-          "e-mail"?: string | null
-          IAStop?: boolean | null
-          id_row?: number
-          Intereacao_completa?: boolean | null
-          mensagem_inicial_enviada?: boolean | null
-          name?: string | null
-          "nome e sobrenome"?: string | null
-          "renda-mensal"?: string | null
-          tentativas_follow_up?: number | null
-          tentativas_followup?: number | null
-          "trabalho-atual"?: string | null
-          ultima_mensagem?: string | null
-          whatsapp?: string | null
-        }
-        Update: {
-          atualização?: string | null
-          cliente_retornou?: boolean | null
-          "Contato realizado"?: string | null
-          created_at?: string
-          data?: string | null
-          data_forms?: string | null
-          "e-mail"?: string | null
-          IAStop?: boolean | null
-          id_row?: number
-          Intereacao_completa?: boolean | null
-          mensagem_inicial_enviada?: boolean | null
-          name?: string | null
-          "nome e sobrenome"?: string | null
-          "renda-mensal"?: string | null
-          tentativas_follow_up?: number | null
-          tentativas_followup?: number | null
-          "trabalho-atual"?: string | null
-          ultima_mensagem?: string | null
-          whatsapp?: string | null
-        }
-        Relationships: []
-      }
-      NexusMind: {
+      funcionarios: {
         Row: {
           created_at: string
-          data_agendamento: string | null
-          data_agendamento_2: string | null
-          id: number
-          id_google_meet: string | null
-          link_da_reunião: string | null
-          nome: string | null
-          status_lead: string | null
-          telefone: string | null
-          tentativa_followup: string | null
-          ultima_mensagem: string | null
+          email: string
+          id: string
+          nome: string
+          salario: number
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          data_agendamento?: string | null
-          data_agendamento_2?: string | null
-          id?: number
-          id_google_meet?: string | null
-          link_da_reunião?: string | null
-          nome?: string | null
-          status_lead?: string | null
-          telefone?: string | null
-          tentativa_followup?: string | null
-          ultima_mensagem?: string | null
+          email: string
+          id?: string
+          nome: string
+          salario: number
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          data_agendamento?: string | null
-          data_agendamento_2?: string | null
-          id?: number
-          id_google_meet?: string | null
-          link_da_reunião?: string | null
-          nome?: string | null
-          status_lead?: string | null
-          telefone?: string | null
-          tentativa_followup?: string | null
-          ultima_mensagem?: string | null
-        }
-        Relationships: []
-      }
-      NexusMindFollowUp: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: number
-          interesse: string | null
-          mensagem_inicial: string | null
-          nome: string | null
-          telefone: number | null
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          interesse?: string | null
-          mensagem_inicial?: string | null
-          nome?: string | null
-          telefone?: number | null
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          interesse?: string | null
-          mensagem_inicial?: string | null
-          nome?: string | null
-          telefone?: number | null
-        }
-        Relationships: []
-      }
-      relatorio_workflows: {
-        Row: {
-          concluiu_todas_etapas: number | null
-          concluiu_todas_etapas_no_dia: number | null
-          created_at: string
-          databook_enviado: number | null
-          databook_enviado_dia: number | null
-          Empresa: string | null
-          id: number
-          primeiro_contato: number | null
-          primeiro_contato_neste_dia: number | null
-        }
-        Insert: {
-          concluiu_todas_etapas?: number | null
-          concluiu_todas_etapas_no_dia?: number | null
-          created_at?: string
-          databook_enviado?: number | null
-          databook_enviado_dia?: number | null
-          Empresa?: string | null
-          id?: number
-          primeiro_contato?: number | null
-          primeiro_contato_neste_dia?: number | null
-        }
-        Update: {
-          concluiu_todas_etapas?: number | null
-          concluiu_todas_etapas_no_dia?: number | null
-          created_at?: string
-          databook_enviado?: number | null
-          databook_enviado_dia?: number | null
-          Empresa?: string | null
-          id?: number
-          primeiro_contato?: number | null
-          primeiro_contato_neste_dia?: number | null
+          email?: string
+          id?: string
+          nome?: string
+          salario?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -600,6 +66,7 @@ export type Database = {
         Row: {
           ambiente: string | null
           base_calculo_icms: string | null
+          base64: string | null
           certificado_digital: string | null
           cest: string | null
           cfop: string | null
@@ -625,6 +92,7 @@ export type Database = {
           emitente_ie: string | null
           emitente_razao_social: string | null
           emitente_regime_tributario: string | null
+          emitente_saquetto: boolean | null
           emitente_telefone: string | null
           explicacao: string | null
           finalidade_nfe: string | null
@@ -671,6 +139,7 @@ export type Database = {
         Insert: {
           ambiente?: string | null
           base_calculo_icms?: string | null
+          base64?: string | null
           certificado_digital?: string | null
           cest?: string | null
           cfop?: string | null
@@ -696,6 +165,7 @@ export type Database = {
           emitente_ie?: string | null
           emitente_razao_social?: string | null
           emitente_regime_tributario?: string | null
+          emitente_saquetto?: boolean | null
           emitente_telefone?: string | null
           explicacao?: string | null
           finalidade_nfe?: string | null
@@ -742,6 +212,7 @@ export type Database = {
         Update: {
           ambiente?: string | null
           base_calculo_icms?: string | null
+          base64?: string | null
           certificado_digital?: string | null
           cest?: string | null
           cfop?: string | null
@@ -767,6 +238,7 @@ export type Database = {
           emitente_ie?: string | null
           emitente_razao_social?: string | null
           emitente_regime_tributario?: string | null
+          emitente_saquetto?: boolean | null
           emitente_telefone?: string | null
           explicacao?: string | null
           finalidade_nfe?: string | null
@@ -893,6 +365,252 @@ export type Database = {
         }
         Relationships: []
       }
+      saquetto_atestados: {
+        Row: {
+          atestado_cid: string | null
+          atestado_cid_descricao: string | null
+          atestado_descricao_completa: string | null
+          atestado_dias_afastados: number | null
+          atestado_motivo: string | null
+          atestado_tipo: string | null
+          base64: string | null
+          cid: string | null
+          cid_descricao: string | null
+          cid_descricao_abreviada: string | null
+          cid_excluidos: string | null
+          cid_refer: string | null
+          clinica: string | null
+          clinica_contato_email: string | null
+          clinica_contato_site: string | null
+          clinica_contato_telefone_principal: string | null
+          clinica_contato_telefones_adicionais: Json | null
+          clinica_endereco_bairro: string | null
+          clinica_endereco_cep: string | null
+          clinica_endereco_cidade: string | null
+          clinica_endereco_estado: string | null
+          clinica_endereco_logradouro: string | null
+          clinica_endereco_numero: string | null
+          data_emissao: string | null
+          hora_emissao: string | null
+          id: number
+          medico_categoria: string | null
+          medico_crm: string | null
+          medico_especialidade: string | null
+          medico_especialidades: string | null
+          medico_nome: string | null
+          medico_nome_razao_social: string | null
+          medico_numero_registro: string | null
+          medico_situacao: string | null
+          medico_uf: string | null
+          observacoes: string | null
+          paciente_documento: string | null
+          paciente_nome: string | null
+          perda_dinheiro: string | null
+          resumo: string | null
+          situacao_atestado: string | null
+          status: string | null
+        }
+        Insert: {
+          atestado_cid?: string | null
+          atestado_cid_descricao?: string | null
+          atestado_descricao_completa?: string | null
+          atestado_dias_afastados?: number | null
+          atestado_motivo?: string | null
+          atestado_tipo?: string | null
+          base64?: string | null
+          cid?: string | null
+          cid_descricao?: string | null
+          cid_descricao_abreviada?: string | null
+          cid_excluidos?: string | null
+          cid_refer?: string | null
+          clinica?: string | null
+          clinica_contato_email?: string | null
+          clinica_contato_site?: string | null
+          clinica_contato_telefone_principal?: string | null
+          clinica_contato_telefones_adicionais?: Json | null
+          clinica_endereco_bairro?: string | null
+          clinica_endereco_cep?: string | null
+          clinica_endereco_cidade?: string | null
+          clinica_endereco_estado?: string | null
+          clinica_endereco_logradouro?: string | null
+          clinica_endereco_numero?: string | null
+          data_emissao?: string | null
+          hora_emissao?: string | null
+          id?: number
+          medico_categoria?: string | null
+          medico_crm?: string | null
+          medico_especialidade?: string | null
+          medico_especialidades?: string | null
+          medico_nome?: string | null
+          medico_nome_razao_social?: string | null
+          medico_numero_registro?: string | null
+          medico_situacao?: string | null
+          medico_uf?: string | null
+          observacoes?: string | null
+          paciente_documento?: string | null
+          paciente_nome?: string | null
+          perda_dinheiro?: string | null
+          resumo?: string | null
+          situacao_atestado?: string | null
+          status?: string | null
+        }
+        Update: {
+          atestado_cid?: string | null
+          atestado_cid_descricao?: string | null
+          atestado_descricao_completa?: string | null
+          atestado_dias_afastados?: number | null
+          atestado_motivo?: string | null
+          atestado_tipo?: string | null
+          base64?: string | null
+          cid?: string | null
+          cid_descricao?: string | null
+          cid_descricao_abreviada?: string | null
+          cid_excluidos?: string | null
+          cid_refer?: string | null
+          clinica?: string | null
+          clinica_contato_email?: string | null
+          clinica_contato_site?: string | null
+          clinica_contato_telefone_principal?: string | null
+          clinica_contato_telefones_adicionais?: Json | null
+          clinica_endereco_bairro?: string | null
+          clinica_endereco_cep?: string | null
+          clinica_endereco_cidade?: string | null
+          clinica_endereco_estado?: string | null
+          clinica_endereco_logradouro?: string | null
+          clinica_endereco_numero?: string | null
+          data_emissao?: string | null
+          hora_emissao?: string | null
+          id?: number
+          medico_categoria?: string | null
+          medico_crm?: string | null
+          medico_especialidade?: string | null
+          medico_especialidades?: string | null
+          medico_nome?: string | null
+          medico_nome_razao_social?: string | null
+          medico_numero_registro?: string | null
+          medico_situacao?: string | null
+          medico_uf?: string | null
+          observacoes?: string | null
+          paciente_documento?: string | null
+          paciente_nome?: string | null
+          perda_dinheiro?: string | null
+          resumo?: string | null
+          situacao_atestado?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      saquetto_clientes: {
+        Row: {
+          bairro_fornecedor: string | null
+          cidade_fornecedor: string | null
+          cnpj_comprador: string | null
+          cnpj_fornecedor: string | null
+          comprador: string | null
+          condicao_pagamento: string | null
+          data_emissao: string | null
+          email_fornecedor: string | null
+          endereco_cobranca: string | null
+          endereco_comprador: string | null
+          endereco_fornecedor: string | null
+          fornecedor: string | null
+          frete: string | null
+          id: number
+          ie_fornecedor: string | null
+          itens_codigo: string | null
+          itens_descricao: string | null
+          itens_icms: string | null
+          itens_ipi: string | null
+          itens_ordem_compra: string | null
+          itens_prazo_entrega: string | null
+          itens_preco_total: string | null
+          itens_preco_unitario: string | null
+          itens_quantidade: string | null
+          itens_unidade: string | null
+          itens0_codigo: string | null
+          itens0_ordem_compra: string | null
+          local_entrega: string | null
+          observacao: string | null
+          pedido: string | null
+          telefone_comprador: string | null
+          telefone_fornecedor: string | null
+          uf_fornecedor: string | null
+          valor_total: string | null
+        }
+        Insert: {
+          bairro_fornecedor?: string | null
+          cidade_fornecedor?: string | null
+          cnpj_comprador?: string | null
+          cnpj_fornecedor?: string | null
+          comprador?: string | null
+          condicao_pagamento?: string | null
+          data_emissao?: string | null
+          email_fornecedor?: string | null
+          endereco_cobranca?: string | null
+          endereco_comprador?: string | null
+          endereco_fornecedor?: string | null
+          fornecedor?: string | null
+          frete?: string | null
+          id?: number
+          ie_fornecedor?: string | null
+          itens_codigo?: string | null
+          itens_descricao?: string | null
+          itens_icms?: string | null
+          itens_ipi?: string | null
+          itens_ordem_compra?: string | null
+          itens_prazo_entrega?: string | null
+          itens_preco_total?: string | null
+          itens_preco_unitario?: string | null
+          itens_quantidade?: string | null
+          itens_unidade?: string | null
+          itens0_codigo?: string | null
+          itens0_ordem_compra?: string | null
+          local_entrega?: string | null
+          observacao?: string | null
+          pedido?: string | null
+          telefone_comprador?: string | null
+          telefone_fornecedor?: string | null
+          uf_fornecedor?: string | null
+          valor_total?: string | null
+        }
+        Update: {
+          bairro_fornecedor?: string | null
+          cidade_fornecedor?: string | null
+          cnpj_comprador?: string | null
+          cnpj_fornecedor?: string | null
+          comprador?: string | null
+          condicao_pagamento?: string | null
+          data_emissao?: string | null
+          email_fornecedor?: string | null
+          endereco_cobranca?: string | null
+          endereco_comprador?: string | null
+          endereco_fornecedor?: string | null
+          fornecedor?: string | null
+          frete?: string | null
+          id?: number
+          ie_fornecedor?: string | null
+          itens_codigo?: string | null
+          itens_descricao?: string | null
+          itens_icms?: string | null
+          itens_ipi?: string | null
+          itens_ordem_compra?: string | null
+          itens_prazo_entrega?: string | null
+          itens_preco_total?: string | null
+          itens_preco_unitario?: string | null
+          itens_quantidade?: string | null
+          itens_unidade?: string | null
+          itens0_codigo?: string | null
+          itens0_ordem_compra?: string | null
+          local_entrega?: string | null
+          observacao?: string | null
+          pedido?: string | null
+          telefone_comprador?: string | null
+          telefone_fornecedor?: string | null
+          uf_fornecedor?: string | null
+          valor_total?: string | null
+        }
+        Relationships: []
+      }
       Saquetto_databook: {
         Row: {
           base64: string | null
@@ -925,21 +643,29 @@ export type Database = {
       }
       saquetto_follow_up: {
         Row: {
+          cliente_retornou: boolean | null
+          cnpj: string | null
           codigo_fornecedor: string | null
           codigo_item: string | null
           create_at: string | null
           data_entrada: string | null
           data_mensagem_enviada: string | null
+          data_ultimo_contato: string | null
           dentro_fora_prazo_entrega: string | null
           do_fc_no_dc: string | null
           email: string | null
           emissao_pedido_compra: string | null
+          estado: string | null
           familia: string | null
+          "follow-up": boolean | null
           fornecedor: string | null
           id: number
           id_message: string | null
           mensagem_enviada: string | null
+          mensagem_enviada_ao_usuário: string | null
+          mensagem_usuário: string | null
           mes_entrada: string | null
+          motivo_e_data: string | null
           motivo_reprogramacao: string | null
           nota_fiscal_faturamento: string | null
           nota_fiscal_retorno: string | null
@@ -947,36 +673,45 @@ export type Database = {
           observacao_compra: string | null
           os_pv: string | null
           pedido: string | null
-          percentual: number | null
-          pontualidade: number | null
-          preco: number | null
+          percentual: string | null
+          pontualidade: string | null
+          preco: string | null
           producao_insumos: string | null
-          qualidade: number | null
+          qualidade: string | null
           reprogramacao: string | null
           retornou: string | null
           row_number: string | null
           saldo_pendente_pedido_compra: string | null
+          tentativas_follow_up: number | null
           thread_message: string | null
-          total: number | null
+          total: string | null
           vlr_nf: string | null
           vlr_pedido: string | null
         }
         Insert: {
+          cliente_retornou?: boolean | null
+          cnpj?: string | null
           codigo_fornecedor?: string | null
           codigo_item?: string | null
           create_at?: string | null
           data_entrada?: string | null
           data_mensagem_enviada?: string | null
+          data_ultimo_contato?: string | null
           dentro_fora_prazo_entrega?: string | null
           do_fc_no_dc?: string | null
           email?: string | null
           emissao_pedido_compra?: string | null
+          estado?: string | null
           familia?: string | null
+          "follow-up"?: boolean | null
           fornecedor?: string | null
           id?: number
           id_message?: string | null
           mensagem_enviada?: string | null
+          mensagem_enviada_ao_usuário?: string | null
+          mensagem_usuário?: string | null
           mes_entrada?: string | null
+          motivo_e_data?: string | null
           motivo_reprogramacao?: string | null
           nota_fiscal_faturamento?: string | null
           nota_fiscal_retorno?: string | null
@@ -984,36 +719,45 @@ export type Database = {
           observacao_compra?: string | null
           os_pv?: string | null
           pedido?: string | null
-          percentual?: number | null
-          pontualidade?: number | null
-          preco?: number | null
+          percentual?: string | null
+          pontualidade?: string | null
+          preco?: string | null
           producao_insumos?: string | null
-          qualidade?: number | null
+          qualidade?: string | null
           reprogramacao?: string | null
           retornou?: string | null
           row_number?: string | null
           saldo_pendente_pedido_compra?: string | null
+          tentativas_follow_up?: number | null
           thread_message?: string | null
-          total?: number | null
+          total?: string | null
           vlr_nf?: string | null
           vlr_pedido?: string | null
         }
         Update: {
+          cliente_retornou?: boolean | null
+          cnpj?: string | null
           codigo_fornecedor?: string | null
           codigo_item?: string | null
           create_at?: string | null
           data_entrada?: string | null
           data_mensagem_enviada?: string | null
+          data_ultimo_contato?: string | null
           dentro_fora_prazo_entrega?: string | null
           do_fc_no_dc?: string | null
           email?: string | null
           emissao_pedido_compra?: string | null
+          estado?: string | null
           familia?: string | null
+          "follow-up"?: boolean | null
           fornecedor?: string | null
           id?: number
           id_message?: string | null
           mensagem_enviada?: string | null
+          mensagem_enviada_ao_usuário?: string | null
+          mensagem_usuário?: string | null
           mes_entrada?: string | null
+          motivo_e_data?: string | null
           motivo_reprogramacao?: string | null
           nota_fiscal_faturamento?: string | null
           nota_fiscal_retorno?: string | null
@@ -1021,46 +765,20 @@ export type Database = {
           observacao_compra?: string | null
           os_pv?: string | null
           pedido?: string | null
-          percentual?: number | null
-          pontualidade?: number | null
-          preco?: number | null
+          percentual?: string | null
+          pontualidade?: string | null
+          preco?: string | null
           producao_insumos?: string | null
-          qualidade?: number | null
+          qualidade?: string | null
           reprogramacao?: string | null
           retornou?: string | null
           row_number?: string | null
           saldo_pendente_pedido_compra?: string | null
+          tentativas_follow_up?: number | null
           thread_message?: string | null
-          total?: number | null
+          total?: string | null
           vlr_nf?: string | null
           vlr_pedido?: string | null
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          active: boolean
-          created_at: string
-          email: string
-          id: string
-          password_hash: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          email: string
-          id?: string
-          password_hash: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          email?: string
-          id?: string
-          password_hash?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -1123,7 +841,7 @@ export type Database = {
       }
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
-        Returns: unknown
+        Returns: string
       }
       match_documents: {
         Args: { filter?: Json; match_count?: number; query_embedding: string }
