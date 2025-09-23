@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { ThemeToggle } from "@/components/ThemeToggle"
-import { useSidebar } from "@/components/ui/sidebar"
+import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import saquettoLogo from "@/assets/saquetto-logo.png"
 
@@ -99,21 +99,29 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className={cn(
-        "flex items-center border-b py-4",
-        collapsed ? "px-2 justify-center" : "px-6 gap-3"
+        "flex items-center justify-between border-b py-4",
+        collapsed ? "px-2" : "px-6"
       )}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <img 
-            src={saquettoLogo} 
-            alt="Saquetto"
-            className="h-5 w-5"
-          />
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <h2 className="text-base font-semibold">Saquetto</h2>
-            <p className="text-xs text-muted-foreground">Auditoria Fiscal</p>
+        <div className={cn(
+          "flex items-center",
+          collapsed ? "justify-center" : "gap-3"
+        )}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <img 
+              src={saquettoLogo} 
+              alt="Saquetto"
+              className="h-5 w-5"
+            />
           </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <h2 className="text-base font-semibold">Saquetto</h2>
+              <p className="text-xs text-muted-foreground">Auditoria Fiscal</p>
+            </div>
+          )}
+        </div>
+        {!isMobile && (
+          <SidebarTrigger className="h-6 w-6 shrink-0" />
         )}
       </div>
 
@@ -132,15 +140,16 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
         collapsed && "px-2"
       )}>
         {user && !collapsed && (
-          <div className="text-xs text-muted-foreground">
-            <p>Logado como:</p>
-            <p className="font-medium text-foreground truncate">{user.email}</p>
-          </div>
-        )}
-        
-        {!isMobile && !collapsed && (
-          <div className="flex items-center justify-center">
-            <ThemeToggle />
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground">
+              <p>Logado como:</p>
+              <p className="font-medium text-foreground truncate">{user.email}</p>
+            </div>
+            {!isMobile && (
+              <div className="flex items-center justify-start">
+                <ThemeToggle />
+              </div>
+            )}
           </div>
         )}
         

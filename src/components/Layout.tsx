@@ -14,12 +14,6 @@ export function Layout({ children }: LayoutProps) {
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen w-full flex flex-col">
         {isMobile && <MobileHeader />}
-        {!isMobile && (
-          <header className="h-12 flex items-center border-b bg-background px-4">
-            <SidebarTrigger className="ml-2" />
-            <div className="flex-1" />
-          </header>
-        )}
         
         <div className="flex flex-1 overflow-hidden">
           <AppSidebar />
