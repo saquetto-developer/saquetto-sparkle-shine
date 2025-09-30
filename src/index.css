@@ -137,55 +137,30 @@ Todas as cores devem ser HSL para suporte completo a temas.
   }
   
   .scrollbar-thin::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
+    height: 8px;
+    width: 8px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: hsl(var(--muted) / 0.3);
-    border-radius: var(--radius);
+    background: transparent;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary) / 0.2);
     border-radius: var(--radius);
     transition: var(--transition-fast);
-    border: 2px solid transparent;
-    background-clip: padding-box;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.5);
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: hsl(var(--primary) / 0.3);
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb:active {
-    background: hsl(var(--primary) / 0.7);
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-  
-  /* Drag cursor effect */
-  .cursor-grab {
-    cursor: grab;
-    cursor: -webkit-grab;
-  }
-  
-  .cursor-grabbing {
-    cursor: grabbing !important;
-    cursor: -webkit-grabbing !important;
+    background: hsl(var(--primary) / 0.4);
   }
   
   /* Smooth scroll behavior */
   .scroll-smooth {
     scroll-behavior: smooth;
-  }
-  
-  /* Prevent text selection during drag */
-  .dragging {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
   }
 }
