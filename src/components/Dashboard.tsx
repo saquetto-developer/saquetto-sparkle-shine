@@ -12,7 +12,8 @@ import {
   DollarSign,
   Building2,
   BarChart3,
-  Calendar
+  Calendar,
+  Receipt
 } from 'lucide-react';
 import { MetricCard } from './MetricCard';
 import { TaxChart } from './TaxChart';
@@ -21,6 +22,7 @@ import { TopClientsChart } from './TopClientsChart';
 import { MonthlyTrendChart } from './MonthlyTrendChart';
 import { NotasList } from './NotasList';
 import { OperationsChart } from './OperationsChart';
+import { countByTaxRegime, type TaxRegime } from '@/lib/taxRegimeUtils';
 
 interface OperationData {
   tipo: string;
@@ -42,6 +44,8 @@ interface DashboardData {
   topClientes: Array<{ cliente: string; total: number; valor: number }>;
   monthlyData: Array<{ month: string; count: number }>;
   operacoesPorTipo: OperationData[];
+  simplesNacional: number;
+  lucroPresumido: number;
   
   // Dados separados para Saquetto e Clientes
   saquetto: {
@@ -55,6 +59,8 @@ interface DashboardData {
     totalCofins: number;
     totalIpi: number;
     operacoesPorTipo: OperationData[];
+    simplesNacional: number;
+    lucroPresumido: number;
   };
   clientes: {
     totalNotas: number;
@@ -67,6 +73,8 @@ interface DashboardData {
     totalCofins: number;
     totalIpi: number;
     operacoesPorTipo: OperationData[];
+    simplesNacional: number;
+    lucroPresumido: number;
   };
 }
 
@@ -75,6 +83,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'notas'>('dashboard');
   const [filterType, setFilterType] = useState<'consolidado' | 'saquetto' | 'clientes'>('consolidado');
+  const [taxRegimeFilter, setTaxRegimeFilter] = useState<TaxRegime>('all');
 
   useEffect(() => {
     loadDashboardData();
@@ -182,6 +191,9 @@ export function Dashboard() {
         }, 0);
 
         const operacoesPorTipo = calcularOperacoesPorTipo(notas);
+        
+        // Calculate tax regime counts
+        const taxRegimeCounts = countByTaxRegime(notas);
 
         return {
           totalNotas,
@@ -193,7 +205,9 @@ export function Dashboard() {
           totalPis,
           totalCofins,
           totalIpi,
-          operacoesPorTipo
+          operacoesPorTipo,
+          simplesNacional: taxRegimeCounts.simples,
+          lucroPresumido: taxRegimeCounts.presumido
         };
       };
 
@@ -320,37 +334,67 @@ export function Dashboard() {
               </div>
               
               {activeView === 'dashboard' && (
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant={filterType === 'consolidado' ? 'default' : 'outline'}
-                    onClick={() => setFilterType('consolidado')}
-                    size="sm"
-                  >
-                    <Building2 className="w-4 h-4 mr-2" />
-                    Consolidado
-                  </Button>
-                  <Button 
-                    variant={filterType === 'saquetto' ? 'default' : 'outline'}
-                    onClick={() => setFilterType('saquetto')}
-                    size="sm"
-                  >
-                    <Building2 className="w-4 h-4 mr-2" />
-                    Saquetto Industrial
-                    <Badge variant="secondary" className="ml-2">
-                      {data?.saquetto.totalNotas || 0}
-                    </Badge>
-                  </Button>
-                  <Button 
-                    variant={filterType === 'clientes' ? 'default' : 'outline'}
-                    onClick={() => setFilterType('clientes')}
-                    size="sm"
-                  >
-                    <Building2 className="w-4 h-4 mr-2" />
-                    Clientes
-                    <Badge variant="secondary" className="ml-2">
-                      {data?.clientes.totalNotas || 0}
-                    </Badge>
-                  </Button>
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant={filterType === 'consolidado' ? 'default' : 'outline'}
+                      onClick={() => setFilterType('consolidado')}
+                      size="sm"
+                    >
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Consolidado
+                    </Button>
+                    <Button 
+                      variant={filterType === 'saquetto' ? 'default' : 'outline'}
+                      onClick={() => setFilterType('saquetto')}
+                      size="sm"
+                    >
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Saquetto Industrial
+                      <Badge variant="secondary" className="ml-2">
+                        {data?.saquetto.totalNotas || 0}
+                      </Badge>
+                    </Button>
+                    <Button 
+                      variant={filterType === 'clientes' ? 'default' : 'outline'}
+                      onClick={() => setFilterType('clientes')}
+                      size="sm"
+                    >
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Clientes
+                      <Badge variant="secondary" className="ml-2">
+                        {data?.clientes.totalNotas || 0}
+                      </Badge>
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-sm text-muted-foreground self-center">Regime Tributário:</span>
+                    <Button 
+                      variant={taxRegimeFilter === 'all' ? 'default' : 'outline'}
+                      onClick={() => setTaxRegimeFilter('all')}
+                      size="sm"
+                    >
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Todos
+                    </Button>
+                    <Button 
+                      variant={taxRegimeFilter === 'simples' ? 'default' : 'outline'}
+                      onClick={() => setTaxRegimeFilter('simples')}
+                      size="sm"
+                    >
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Simples Nacional
+                    </Button>
+                    <Button 
+                      variant={taxRegimeFilter === 'presumido' ? 'default' : 'outline'}
+                      onClick={() => setTaxRegimeFilter('presumido')}
+                      size="sm"
+                    >
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Presumido/Real
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -439,6 +483,24 @@ export function Dashboard() {
                     />
                   </div>
 
+                  {/* Tax Regime Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+                    <MetricCard
+                      title="Simples Nacional"
+                      value={currentData.simplesNacional.toLocaleString()}
+                      icon={Receipt}
+                      trend={`${currentData.totalNotas > 0 ? ((currentData.simplesNacional / currentData.totalNotas) * 100).toFixed(1) : 0}% do total`}
+                      variant="success"
+                    />
+                    <MetricCard
+                      title="Lucro Presumido/Real"
+                      value={currentData.lucroPresumido.toLocaleString()}
+                      icon={Receipt}
+                      trend={`${currentData.totalNotas > 0 ? ((currentData.lucroPresumido / currentData.totalNotas) * 100).toFixed(1) : 0}% do total`}
+                      variant="primary"
+                    />
+                  </div>
+
                   {/* Gráficos */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                     <div className="w-full">
@@ -476,7 +538,10 @@ export function Dashboard() {
             })()}
           </>
         ) : (
-          <NotasList filterBySaquetto={filterType === 'saquetto' ? true : filterType === 'clientes' ? false : undefined} />
+          <NotasList 
+            filterBySaquetto={filterType === 'saquetto' ? true : filterType === 'clientes' ? false : undefined}
+            filterByTaxRegime={taxRegimeFilter}
+          />
         )}
       </div>
     </div>

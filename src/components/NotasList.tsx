@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchBase64ForNota } from '@/lib/notaFiscalBase64';
+import { filterByTaxRegime, getTaxRegimeShortLabel, type TaxRegime } from '@/lib/taxRegimeUtils';
 import { 
   Search, 
   Filter, 
@@ -18,7 +19,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Download
+  Download,
+  Receipt
 } from 'lucide-react';
 
 interface Nota {
@@ -41,13 +43,15 @@ interface Nota {
   pis_valor: string;
   cofins_valor: string;
   ipi_valor: string;
+  simples_optante?: boolean | null;
 }
 
 interface NotasListProps {
   filterBySaquetto?: boolean;
+  filterByTaxRegime?: TaxRegime;
 }
 
-export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
+export function NotasList({ filterBySaquetto, filterByTaxRegime: taxRegimeFilterProp = 'all' }: NotasListProps = {}) {
   const [notas, setNotas] = useState<Nota[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,7 +63,7 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
 
   useEffect(() => {
     loadNotas();
-  }, [filterBySaquetto]);
+  }, [filterBySaquetto, taxRegimeFilterProp]);
 
   const loadNotas = async () => {
     try {
@@ -90,7 +94,10 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
     }
   };
 
-  const filteredNotas = notas.filter(nota => {
+  // Apply tax regime filter first
+  const taxRegimeFilteredNotas = filterByTaxRegime(notas, taxRegimeFilterProp);
+
+  const filteredNotas = taxRegimeFilteredNotas.filter(nota => {
     const matchesSearch = 
       nota.numero_nfe?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       nota.destinatario_razao_social?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -251,9 +258,15 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
                       <Building2 className="w-4 h-4" />
                       {nota.destinatario_razao_social || nota.emitente_razao_social || 'N/A'}
                     </div>
-                    <div className="flex items-center gap-2">
+                   <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4" />
                       {formatCurrency(nota.valor_total_nfe)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Receipt className="w-4 h-4" />
+                      <Badge variant="outline" className="text-xs">
+                        {getTaxRegimeShortLabel(nota.simples_optante)}
+                      </Badge>
                     </div>
                   </div>
                 </div>

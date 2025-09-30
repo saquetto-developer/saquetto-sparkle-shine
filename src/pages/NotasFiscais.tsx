@@ -27,9 +27,10 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Search, FileText, Calendar, Filter, Download } from 'lucide-react'
+import { Search, FileText, Calendar, Filter, Download, Receipt } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { fetchBase64ForNota } from '@/lib/notaFiscalBase64'
+import { filterByTaxRegime, getTaxRegimeShortLabel, type TaxRegime } from '@/lib/taxRegimeUtils'
 
 interface NotaFiscal {
   id: number
@@ -47,6 +48,7 @@ interface NotaFiscal {
   status_autorizacao: string
   pedido: string
   linha: string
+  simples_optante?: boolean | null
 }
 
 export default function NotasFiscais() {
@@ -58,6 +60,7 @@ export default function NotasFiscais() {
     cliente: 'all',
     situacao: 'all',
     natureza: 'all',
+    regimeTributario: 'all' as TaxRegime,
     periodo: ''
   })
 
@@ -112,7 +115,10 @@ export default function NotasFiscais() {
     }
   }
 
-  const filteredNotas = notas.filter(nota => {
+  // Apply tax regime filter first
+  const taxRegimeFilteredNotas = filterByTaxRegime(notas, filters.regimeTributario);
+
+  const filteredNotas = taxRegimeFilteredNotas.filter(nota => {
     const matchesSearch = 
       nota.numero_nfe?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       nota.destinatario_razao_social?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -183,6 +189,7 @@ export default function NotasFiscais() {
       cliente: 'all',
       situacao: 'all',
       natureza: 'all',
+      regimeTributario: 'all',
       periodo: ''
     })
   }
@@ -262,6 +269,17 @@ export default function NotasFiscais() {
                   {natureza}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={filters.regimeTributario} onValueChange={(value: TaxRegime) => setFilters(prev => ({ ...prev, regimeTributario: value }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Regime tributário" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os regimes</SelectItem>
+              <SelectItem value="simples">Simples Nacional</SelectItem>
+              <SelectItem value="presumido">Lucro Presumido/Real</SelectItem>
             </SelectContent>
           </Select>
 
@@ -356,6 +374,7 @@ export default function NotasFiscais() {
                 <TableHead>Cliente</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Operação</TableHead>
+                <TableHead>Regime</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -377,6 +396,12 @@ export default function NotasFiscais() {
                   </TableCell>
                   <TableCell className="max-w-xs truncate">
                     {nota.natureza_operacao}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      <Receipt className="w-3 h-3 mr-1" />
+                      {getTaxRegimeShortLabel(nota.simples_optante)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant={
