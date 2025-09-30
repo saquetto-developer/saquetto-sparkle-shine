@@ -369,34 +369,58 @@ export default function NotasFiscais() {
         <CardContent>
           <div className="relative overflow-hidden rounded-md border">
             <div 
-              className="overflow-x-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/30 transition-colors cursor-grab active:cursor-grabbing"
+              className="overflow-x-auto scrollbar-thin transition-colors select-none"
               style={{
-                scrollBehavior: 'smooth',
+                cursor: 'grab',
                 WebkitOverflowScrolling: 'touch'
               }}
               onMouseDown={(e) => {
+                // Previne seleção de texto durante o drag
+                e.preventDefault();
+                
                 const elem = e.currentTarget;
                 const startX = e.pageX - elem.offsetLeft;
                 const scrollLeft = elem.scrollLeft;
+                let isMouseDown = true;
                 
-                const handleMouseMove = (e: MouseEvent) => {
-                  e.preventDefault();
-                  const x = e.pageX - elem.offsetLeft;
-                  const walk = (x - startX) * 2;
+                // Muda o cursor para grabbing
+                elem.style.cursor = 'grabbing';
+                elem.classList.add('active:cursor-grabbing');
+                
+                const handleMouseMove = (moveEvent: MouseEvent) => {
+                  if (!isMouseDown) return;
+                  
+                  moveEvent.preventDefault();
+                  const x = moveEvent.pageX - elem.offsetLeft;
+                  const walk = (x - startX) * 2.5; // Velocidade do scroll
                   elem.scrollLeft = scrollLeft - walk;
-                  elem.style.cursor = 'grabbing';
-                  elem.style.userSelect = 'none';
                 };
                 
                 const handleMouseUp = () => {
+                  isMouseDown = false;
+                  elem.style.cursor = 'grab';
+                  elem.classList.remove('active:cursor-grabbing');
                   document.removeEventListener('mousemove', handleMouseMove);
                   document.removeEventListener('mouseup', handleMouseUp);
-                  elem.style.cursor = 'grab';
-                  elem.style.userSelect = 'auto';
+                  document.removeEventListener('mouseleave', handleMouseUp);
                 };
                 
+                // Adiciona listeners
                 document.addEventListener('mousemove', handleMouseMove);
                 document.addEventListener('mouseup', handleMouseUp);
+                document.addEventListener('mouseleave', handleMouseUp);
+              }}
+              onMouseLeave={(e) => {
+                // Garante que o cursor volte ao normal ao sair
+                e.currentTarget.style.cursor = 'grab';
+              }}
+              onClick={(e) => {
+                // Previne clicks acidentais durante o drag
+                const elem = e.currentTarget;
+                if (elem.getAttribute('data-dragging') === 'true') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
               }}
             >
             <Table className="min-w-[800px]">
