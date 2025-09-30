@@ -27,7 +27,6 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Search, FileText, Calendar, Filter, Download, Receipt } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { fetchBase64ForNota } from '@/lib/notaFiscalBase64'
@@ -368,7 +367,38 @@ export default function NotasFiscais() {
           <CardTitle>Lista de Notas Fiscais</CardTitle>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="w-full">
+          <div className="relative overflow-hidden rounded-md border">
+            <div 
+              className="overflow-x-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/30 transition-colors cursor-grab active:cursor-grabbing"
+              style={{
+                scrollBehavior: 'smooth',
+                WebkitOverflowScrolling: 'touch'
+              }}
+              onMouseDown={(e) => {
+                const elem = e.currentTarget;
+                const startX = e.pageX - elem.offsetLeft;
+                const scrollLeft = elem.scrollLeft;
+                
+                const handleMouseMove = (e: MouseEvent) => {
+                  e.preventDefault();
+                  const x = e.pageX - elem.offsetLeft;
+                  const walk = (x - startX) * 2;
+                  elem.scrollLeft = scrollLeft - walk;
+                  elem.style.cursor = 'grabbing';
+                  elem.style.userSelect = 'none';
+                };
+                
+                const handleMouseUp = () => {
+                  document.removeEventListener('mousemove', handleMouseMove);
+                  document.removeEventListener('mouseup', handleMouseUp);
+                  elem.style.cursor = 'grab';
+                  elem.style.userSelect = 'auto';
+                };
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+              }}
+            >
             <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
@@ -511,8 +541,8 @@ export default function NotasFiscais() {
               ))}
             </TableBody>
           </Table>
-          <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+            </div>
+          </div>
           {filteredNotas.length > 100 && (
             <div className="mt-4 text-center text-sm text-muted-foreground">
               Mostrando 100 de {filteredNotas.length} notas. Use os filtros para refinar a busca.
