@@ -281,6 +281,7 @@ export default function NotasFiscais() {
               <SelectItem value="all">Todos os regimes</SelectItem>
               <SelectItem value="simples">Simples Nacional</SelectItem>
               <SelectItem value="presumido">Lucro Presumido/Real</SelectItem>
+              <SelectItem value="sem_informacao">Sem Informação</SelectItem>
             </SelectContent>
           </Select>
 

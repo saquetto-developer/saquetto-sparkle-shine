@@ -46,6 +46,7 @@ interface DashboardData {
   operacoesPorTipo: OperationData[];
   simplesNacional: number;
   lucroPresumido: number;
+  semInformacao: number;
   
   // Dados separados para Saquetto e Clientes
   saquetto: {
@@ -61,6 +62,7 @@ interface DashboardData {
     operacoesPorTipo: OperationData[];
     simplesNacional: number;
     lucroPresumido: number;
+    semInformacao: number;
   };
   clientes: {
     totalNotas: number;
@@ -75,6 +77,7 @@ interface DashboardData {
     operacoesPorTipo: OperationData[];
     simplesNacional: number;
     lucroPresumido: number;
+    semInformacao: number;
   };
 }
 
@@ -207,7 +210,8 @@ export function Dashboard() {
           totalIpi,
           operacoesPorTipo,
           simplesNacional: taxRegimeCounts.simples,
-          lucroPresumido: taxRegimeCounts.presumido
+          lucroPresumido: taxRegimeCounts.presumido,
+          semInformacao: taxRegimeCounts.sem_informacao
         };
       };
 
@@ -394,6 +398,14 @@ export function Dashboard() {
                       <Receipt className="w-4 h-4 mr-2" />
                       Presumido/Real
                     </Button>
+                    <Button 
+                      variant={taxRegimeFilter === 'sem_informacao' ? 'default' : 'outline'}
+                      onClick={() => setTaxRegimeFilter('sem_informacao')}
+                      size="sm"
+                    >
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Sem Informação
+                    </Button>
                   </div>
                 </div>
               )}
@@ -484,7 +496,7 @@ export function Dashboard() {
                   </div>
 
                   {/* Tax Regime Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
                     <MetricCard
                       title="Simples Nacional"
                       value={currentData.simplesNacional.toLocaleString()}
@@ -498,6 +510,13 @@ export function Dashboard() {
                       icon={Receipt}
                       trend={`${currentData.totalNotas > 0 ? ((currentData.lucroPresumido / currentData.totalNotas) * 100).toFixed(1) : 0}% do total`}
                       variant="primary"
+                    />
+                    <MetricCard
+                      title="Sem Informação"
+                      value={currentData.semInformacao.toLocaleString()}
+                      icon={Receipt}
+                      trend={`${currentData.totalNotas > 0 ? ((currentData.semInformacao / currentData.totalNotas) * 100).toFixed(1) : 0}% do total`}
+                      variant="default"
                     />
                   </div>
 

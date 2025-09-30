@@ -3,7 +3,7 @@
  * Helper functions for handling tax regime (Simples Nacional vs Lucro Presumido/Real)
  */
 
-export type TaxRegime = 'simples' | 'presumido' | 'all';
+export type TaxRegime = 'simples' | 'presumido' | 'sem_informacao' | 'all';
 
 export interface TaxRegimeInfo {
   value: TaxRegime;
@@ -25,6 +25,12 @@ export const TAX_REGIMES: Record<TaxRegime, TaxRegimeInfo> = {
     shortLabel: 'Presumido/Real',
     description: 'Regime tributário de lucro presumido ou real'
   },
+  sem_informacao: {
+    value: 'sem_informacao',
+    label: 'Sem Informação',
+    shortLabel: 'Sem Info',
+    description: 'Regime tributário não informado'
+  },
   all: {
     value: 'all',
     label: 'Todos os Regimes',
@@ -39,7 +45,7 @@ export const TAX_REGIMES: Record<TaxRegime, TaxRegimeInfo> = {
 export function getTaxRegimeFromBoolean(simplesOptante: boolean | null): TaxRegime {
   if (simplesOptante === true) return 'simples';
   if (simplesOptante === false) return 'presumido';
-  return 'presumido'; // Default to presumido for null values
+  return 'sem_informacao'; // Return sem_informacao for null values
 }
 
 /**
@@ -78,17 +84,19 @@ export function filterByTaxRegime<T extends { simples_optante?: boolean | null }
  */
 export function countByTaxRegime<T extends { simples_optante?: boolean | null }>(
   notes: T[]
-): Record<'simples' | 'presumido', number> {
+): Record<'simples' | 'presumido' | 'sem_informacao', number> {
   return notes.reduce(
     (acc, note) => {
       const regime = getTaxRegimeFromBoolean(note.simples_optante ?? null);
       if (regime === 'simples') {
         acc.simples++;
-      } else {
+      } else if (regime === 'presumido') {
         acc.presumido++;
+      } else {
+        acc.sem_informacao++;
       }
       return acc;
     },
-    { simples: 0, presumido: 0 }
+    { simples: 0, presumido: 0, sem_informacao: 0 }
   );
 }
