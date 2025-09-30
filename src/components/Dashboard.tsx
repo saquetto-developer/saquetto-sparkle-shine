@@ -22,7 +22,7 @@ import { TopClientsChart } from './TopClientsChart';
 import { MonthlyTrendChart } from './MonthlyTrendChart';
 import { NotasList } from './NotasList';
 import { OperationsChart } from './OperationsChart';
-import { countByTaxRegime, type TaxRegime } from '@/lib/taxRegimeUtils';
+import { countByTaxRegime, filterByTaxRegime, type TaxRegime } from '@/lib/taxRegimeUtils';
 
 interface OperationData {
   tipo: string;
@@ -83,6 +83,7 @@ interface DashboardData {
 
 export function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [rawNotasData, setRawNotasData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'notas'>('dashboard');
   const [filterType, setFilterType] = useState<'consolidado' | 'saquetto' | 'clientes'>('consolidado');
@@ -107,6 +108,9 @@ export function Dashboard() {
       }
 
       if (!notasData) return;
+
+      // Store raw data for filtering
+      setRawNotasData(notasData);
 
       // Separar dados por tipo de emitente
       const saquetoNotas = notasData.filter((n: any) => n.emitente_saquetto === true);
@@ -417,8 +421,116 @@ export function Dashboard() {
         {activeView === 'dashboard' ? (
           <>
             {(() => {
-              const currentData = filterType === 'saquetto' ? data.saquetto : 
-                                 filterType === 'clientes' ? data.clientes : data;
+              // Get raw data based on filterType
+              const saquetoNotas = rawNotasData.filter((n: any) => n.emitente_saquetto === true);
+              const clientesNotas = rawNotasData.filter((n: any) => n.emitente_saquetto === false || n.emitente_saquetto === null);
+              
+              let selectedRawData = filterType === 'saquetto' ? saquetoNotas : 
+                                   filterType === 'clientes' ? clientesNotas : rawNotasData;
+              
+              // Apply tax regime filter
+              const filteredData = filterByTaxRegime(selectedRawData, taxRegimeFilter);
+              
+              // Calculate metrics with filtered data
+              const calcularMetricas = (notas: any[]) => {
+                const totalNotas = notas.length;
+                const notasAprovadas = notas.filter(n => n.situacao === 'Aprovado').length;
+                const notasReprovadas = notas.filter(n => n.situacao === 'Reprovado').length;
+                const notasAlerta = notas.filter(n => n.situacao === 'Alerta').length;
+                
+                const valorTotal = notas.reduce((sum, nota) => {
+                  const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  return sum + valor;
+                }, 0);
+
+                const totalIcms = notas.reduce((sum, nota) => {
+                  const valor = parseFloat(nota.icms_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  return sum + valor;
+                }, 0);
+
+                const totalPis = notas.reduce((sum, nota) => {
+                  const valor = parseFloat(nota.pis_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  return sum + valor;
+                }, 0);
+
+                const totalCofins = notas.reduce((sum, nota) => {
+                  const valor = parseFloat(nota.cofins_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  return sum + valor;
+                }, 0);
+
+                const totalIpi = notas.reduce((sum, nota) => {
+                  const valor = parseFloat(nota.ipi_valor?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  return sum + valor;
+                }, 0);
+
+                const extrairTipoOperacao = (naturezaOperacao: string): string => {
+                  if (!naturezaOperacao) return 'OUTROS';
+                  const cleaned = naturezaOperacao.trim().toUpperCase();
+                  const primeiraPalavra = cleaned.split(' ')[0];
+                  if (primeiraPalavra.match(/^\d/)) return 'OUTROS';
+                  if (primeiraPalavra.length < 3) return 'OUTROS';
+                  return primeiraPalavra;
+                };
+
+                const operacoesMap = new Map<string, { quantidade: number; valor: number }>();
+                notas.forEach(nota => {
+                  const tipo = extrairTipoOperacao(nota.natureza_operacao);
+                  const valor = parseFloat(nota.valor_total_nfe?.replace(/[^\d,.-]/g, '')?.replace(',', '.') || '0');
+                  
+                  if (operacoesMap.has(tipo)) {
+                    const existing = operacoesMap.get(tipo)!;
+                    operacoesMap.set(tipo, {
+                      quantidade: existing.quantidade + 1,
+                      valor: existing.valor + valor
+                    });
+                  } else {
+                    operacoesMap.set(tipo, { quantidade: 1, valor });
+                  }
+                });
+
+                const operacoesPorTipo = Array.from(operacoesMap.entries())
+                  .map(([tipo, stats]) => ({
+                    tipo,
+                    quantidade: stats.quantidade,
+                    valor: stats.valor,
+                    percentual: totalNotas > 0 ? (stats.quantidade / notas.length) * 100 : 0
+                  }))
+                  .sort((a, b) => b.quantidade - a.quantidade);
+                
+                const taxRegimeCounts = countByTaxRegime(notas);
+
+                return {
+                  totalNotas,
+                  notasAprovadas,
+                  notasReprovadas,
+                  notasAlerta,
+                  valorTotal,
+                  totalIcms,
+                  totalPis,
+                  totalCofins,
+                  totalIpi,
+                  operacoesPorTipo,
+                  simplesNacional: taxRegimeCounts.simples,
+                  lucroPresumido: taxRegimeCounts.presumido,
+                  semInformacao: taxRegimeCounts.sem_informacao
+                };
+              };
+              
+              const currentData = filteredData.length > 0 ? calcularMetricas(filteredData) : {
+                totalNotas: 0,
+                notasAprovadas: 0,
+                notasReprovadas: 0,
+                notasAlerta: 0,
+                valorTotal: 0,
+                totalIcms: 0,
+                totalPis: 0,
+                totalCofins: 0,
+                totalIpi: 0,
+                operacoesPorTipo: [],
+                simplesNacional: 0,
+                lucroPresumido: 0,
+                semInformacao: 0
+              };
               
               return (
                 <>
