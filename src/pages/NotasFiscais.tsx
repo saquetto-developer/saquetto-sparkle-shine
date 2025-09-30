@@ -29,8 +29,10 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Search, FileText, Calendar, Filter, Download } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { fetchBase64ForNota } from '@/lib/notaFiscalBase64'
 
 interface NotaFiscal {
+  id: number
   numero_nfe: string
   data_emissao: string
   valor_total_nfe: string
@@ -45,7 +47,6 @@ interface NotaFiscal {
   status_autorizacao: string
   pedido: string
   linha: string
-  base64?: string
 }
 
 export default function NotasFiscais() {
@@ -131,19 +132,22 @@ export default function NotasFiscais() {
     }).format(numValue)
   }
 
-  const downloadXML = (nota: NotaFiscal) => {
-    if (!nota.base64) {
-      toast({
-        title: "Erro",
-        description: "XML não disponível para esta nota fiscal",
-        variant: "destructive"
-      })
-      return
-    }
-
+  const downloadXML = async (nota: NotaFiscal) => {
     try {
+      // Buscar base64 da nova tabela
+      const base64 = await fetchBase64ForNota(nota.id)
+      
+      if (!base64) {
+        toast({
+          title: "Erro",
+          description: "XML não disponível para esta nota fiscal",
+          variant: "destructive"
+        })
+        return
+      }
+
       // Decodificar base64 para XML
-      const xmlContent = atob(nota.base64)
+      const xmlContent = atob(base64)
       
       // Criar arquivo para download
       const blob = new Blob([xmlContent], { type: 'application/xml' })
@@ -469,8 +473,7 @@ export default function NotasFiscais() {
                       variant="outline"
                       size="sm"
                       onClick={() => downloadXML(nota)}
-                      disabled={!nota.base64}
-                      title={nota.base64 ? "Baixar XML" : "XML não disponível"}
+                      title="Baixar XML"
                     >
                       <Download className="h-4 w-4" />
                     </Button>

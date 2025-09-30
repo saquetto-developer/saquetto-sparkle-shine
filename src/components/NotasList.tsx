@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchBase64ForNota } from '@/lib/notaFiscalBase64';
 import { 
   Search, 
   Filter, 
@@ -16,7 +17,8 @@ import {
   DollarSign,
   AlertTriangle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Download
 } from 'lucide-react';
 
 interface Nota {
@@ -52,6 +54,7 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [selectedNota, setSelectedNota] = useState<Nota | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -130,6 +133,42 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
       return date.toLocaleDateString('pt-BR');
     } catch {
       return dateStr;
+    }
+  };
+
+  const downloadXML = async (nota: Nota) => {
+    setDownloadingId(nota.id);
+    try {
+      // Buscar base64 da nova tabela
+      const base64 = await fetchBase64ForNota(nota.id);
+      
+      if (!base64) {
+        alert('XML não disponível para esta nota fiscal');
+        return;
+      }
+
+      // Decodificar base64 para XML
+      const xmlContent = atob(base64);
+      
+      // Criar arquivo para download
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Criar link de download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `NFe-${nota.numero_nfe}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpar recursos
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao fazer download do XML:', error);
+      alert('Erro ao processar o arquivo XML');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -219,13 +258,24 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
                   </div>
                 </div>
                 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" onClick={() => setSelectedNota(nota)}>
-                      <Eye className="w-4 h-4 mr-2" />
-                      Ver Detalhes
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => downloadXML(nota)}
+                    disabled={downloadingId === nota.id}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    {downloadingId === nota.id ? 'Baixando...' : 'XML'}
+                  </Button>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedNota(nota)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ver Detalhes
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Detalhes da NFe {nota.numero_nfe}</DialogTitle>
@@ -292,6 +342,7 @@ export function NotasList({ filterBySaquetto }: NotasListProps = {}) {
                     )}
                   </DialogContent>
                 </Dialog>
+                </div>
               </div>
             </CardContent>
           </Card>

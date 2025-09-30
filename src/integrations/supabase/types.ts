@@ -35,38 +35,10 @@ export type Database = {
         }
         Relationships: []
       }
-      funcionarios: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          nome: string
-          salario: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          nome: string
-          salario: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          nome?: string
-          salario?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       saquetto: {
         Row: {
           ambiente: string | null
           base_calculo_icms: string | null
-          base64: string | null
           certificado_digital: string | null
           cest: string | null
           cfop: string | null
@@ -122,6 +94,7 @@ export type Database = {
           protocolo_sefaz: string | null
           quantidade: string | null
           serie: string | null
+          simples_optante: boolean | null
           situacao: string | null
           status_autorizacao: string | null
           transportadora: string | null
@@ -139,7 +112,6 @@ export type Database = {
         Insert: {
           ambiente?: string | null
           base_calculo_icms?: string | null
-          base64?: string | null
           certificado_digital?: string | null
           cest?: string | null
           cfop?: string | null
@@ -195,6 +167,7 @@ export type Database = {
           protocolo_sefaz?: string | null
           quantidade?: string | null
           serie?: string | null
+          simples_optante?: boolean | null
           situacao?: string | null
           status_autorizacao?: string | null
           transportadora?: string | null
@@ -212,7 +185,6 @@ export type Database = {
         Update: {
           ambiente?: string | null
           base_calculo_icms?: string | null
-          base64?: string | null
           certificado_digital?: string | null
           cest?: string | null
           cfop?: string | null
@@ -268,6 +240,7 @@ export type Database = {
           protocolo_sefaz?: string | null
           quantidade?: string | null
           serie?: string | null
+          simples_optante?: boolean | null
           situacao?: string | null
           status_autorizacao?: string | null
           transportadora?: string | null
@@ -367,13 +340,13 @@ export type Database = {
       }
       saquetto_atestados: {
         Row: {
+          acidente_empresa: boolean | null
           atestado_cid: string | null
           atestado_cid_descricao: string | null
           atestado_descricao_completa: string | null
           atestado_dias_afastados: number | null
           atestado_motivo: string | null
           atestado_tipo: string | null
-          base64: string | null
           cid: string | null
           cid_descricao: string | null
           cid_descricao_abreviada: string | null
@@ -407,17 +380,18 @@ export type Database = {
           paciente_nome: string | null
           perda_dinheiro: string | null
           resumo: string | null
+          salario: number | null
           situacao_atestado: string | null
           status: string | null
         }
         Insert: {
+          acidente_empresa?: boolean | null
           atestado_cid?: string | null
           atestado_cid_descricao?: string | null
           atestado_descricao_completa?: string | null
           atestado_dias_afastados?: number | null
           atestado_motivo?: string | null
           atestado_tipo?: string | null
-          base64?: string | null
           cid?: string | null
           cid_descricao?: string | null
           cid_descricao_abreviada?: string | null
@@ -451,17 +425,18 @@ export type Database = {
           paciente_nome?: string | null
           perda_dinheiro?: string | null
           resumo?: string | null
+          salario?: number | null
           situacao_atestado?: string | null
           status?: string | null
         }
         Update: {
+          acidente_empresa?: boolean | null
           atestado_cid?: string | null
           atestado_cid_descricao?: string | null
           atestado_descricao_completa?: string | null
           atestado_dias_afastados?: number | null
           atestado_motivo?: string | null
           atestado_tipo?: string | null
-          base64?: string | null
           cid?: string | null
           cid_descricao?: string | null
           cid_descricao_abreviada?: string | null
@@ -495,8 +470,65 @@ export type Database = {
           paciente_nome?: string | null
           perda_dinheiro?: string | null
           resumo?: string | null
+          salario?: number | null
           situacao_atestado?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      saquetto_atestados_base64: {
+        Row: {
+          atestado_id: number
+          base64: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          atestado_id: number
+          base64?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          atestado_id?: number
+          base64?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_atestado_base64_atestado_id"
+            columns: ["atestado_id"]
+            isOneToOne: false
+            referencedRelation: "saquetto_atestados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saquetto_atestados_upload: {
+        Row: {
+          acidente_empresa: boolean | null
+          base64: string | null
+          created_at: string
+          id: number
+          status: string | null
+          user_email: string | null
+        }
+        Insert: {
+          acidente_empresa?: boolean | null
+          base64?: string | null
+          created_at?: string
+          id?: number
+          status?: string | null
+          user_email?: string | null
+        }
+        Update: {
+          acidente_empresa?: boolean | null
+          base64?: string | null
+          created_at?: string
+          id?: number
+          status?: string | null
+          user_email?: string | null
         }
         Relationships: []
       }
@@ -779,6 +811,110 @@ export type Database = {
           total?: string | null
           vlr_nf?: string | null
           vlr_pedido?: string | null
+        }
+        Relationships: []
+      }
+      saquetto_funcionarios: {
+        Row: {
+          arquivos_medicos: Json | null
+          created_at: string
+          data_entrada_empresa: string | null
+          data_saida_empresa: string | null
+          descricao: string | null
+          email: string
+          id: string
+          nome: string
+          salario: number
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          arquivos_medicos?: Json | null
+          created_at?: string
+          data_entrada_empresa?: string | null
+          data_saida_empresa?: string | null
+          descricao?: string | null
+          email: string
+          id?: string
+          nome: string
+          salario?: number
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arquivos_medicos?: Json | null
+          created_at?: string
+          data_entrada_empresa?: string | null
+          data_saida_empresa?: string | null
+          descricao?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          salario?: number
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saquetto_notafiscal_base64: {
+        Row: {
+          base64: string | null
+          created_at: string
+          id: string
+          saquetto_id: number
+          updated_at: string
+        }
+        Insert: {
+          base64?: string | null
+          created_at?: string
+          id?: string
+          saquetto_id: number
+          updated_at?: string
+        }
+        Update: {
+          base64?: string | null
+          created_at?: string
+          id?: string
+          saquetto_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_saquetto_notafiscal_base64_saquetto"
+            columns: ["saquetto_id"]
+            isOneToOne: false
+            referencedRelation: "saquetto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          nome: string | null
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          nome?: string | null
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string | null
+          password_hash?: string
+          updated_at?: string
         }
         Relationships: []
       }
