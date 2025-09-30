@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { ThemeToggle } from "@/components/ThemeToggle"
-import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import saquettoLogo from "@/assets/saquetto-logo.png"
 
@@ -99,8 +99,8 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className={cn(
-        "flex items-center justify-between border-b py-4",
-        collapsed ? "px-2" : "px-6"
+        "flex items-center border-b py-4",
+        collapsed ? "justify-center px-2" : "px-6"
       )}>
         <div className={cn(
           "flex items-center",
@@ -120,9 +120,6 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
             </div>
           )}
         </div>
-        {!isMobile && (
-          <SidebarTrigger className="h-6 w-6 shrink-0" />
-        )}
       </div>
 
       {/* Navigation */}
