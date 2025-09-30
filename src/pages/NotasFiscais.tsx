@@ -27,6 +27,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Search, FileText, Calendar, Filter, Download, Receipt } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { fetchBase64ForNota } from '@/lib/notaFiscalBase64'
@@ -366,7 +367,8 @@ export default function NotasFiscais() {
           <CardTitle>Lista de Notas Fiscais</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <ScrollArea className="w-full">
+            <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Número</TableHead>
@@ -508,6 +510,8 @@ export default function NotasFiscais() {
               ))}
             </TableBody>
           </Table>
+          <ScrollBar orientation="horizontal" />
+          </ScrollArea>
           {filteredNotas.length > 100 && (
             <div className="mt-4 text-center text-sm text-muted-foreground">
               Mostrando 100 de {filteredNotas.length} notas. Use os filtros para refinar a busca.
