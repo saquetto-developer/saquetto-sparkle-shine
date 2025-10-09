@@ -198,7 +198,7 @@ export async function getPublicInvoiceUrl(saquettoId: number): Promise<string | 
     // Get file metadata from database
     const { data: metadata, error: metadataError } = await supabase
       .from('saquetto_invoices_storage')
-      .select('file_name')
+      .select('file_path')
       .eq('saquetto_id', saquettoId)
       .maybeSingle();
 
@@ -207,10 +207,12 @@ export async function getPublicInvoiceUrl(saquettoId: number): Promise<string | 
       return null;
     }
 
-    // Build public URL using the correct bucket and file name
-    const publicUrl = `https://lrtbxavrkoqbbpjcgoqm.supabase.co/storage/v1/object/public/notas_fiscais/${metadata.file_name}`;
+    // Use official Supabase API to get public URL
+    const { data } = supabase.storage
+      .from('notas_fiscais')
+      .getPublicUrl(metadata.file_path);
     
-    return publicUrl;
+    return data.publicUrl;
   } catch (error) {
     console.error('Error getting public invoice URL:', error);
     return null;

@@ -217,6 +217,7 @@ export default function Relatorios() {
         })
 
         faturamentoMensal = Array.from(trimestreMap.entries()).map(([key, stats]) => ({
+          mesKey: key,
           mes: key,
           valor: stats.valor,
           quantidade: stats.quantidade
@@ -241,6 +242,7 @@ export default function Relatorios() {
         })
 
         faturamentoMensal = Array.from(anoMap.entries()).map(([key, stats]) => ({
+          mesKey: key,
           mes: key,
           valor: stats.valor,
           quantidade: stats.quantidade
@@ -491,17 +493,9 @@ export default function Relatorios() {
         .sort((a, b) => b.valor - a.valor)
         .slice(0, 5)
 
-      // 6. Tempo Médio de Auditoria (em horas)
-      const notasComTempo = notasFiltradas.filter(n => n.created_at && n.updated_at)
-      const tempoTotalHoras = notasComTempo.reduce((acc, nota) => {
-        const criacao = new Date(nota.created_at).getTime()
-        const atualizacao = new Date(nota.updated_at).getTime()
-        const diferencaHoras = (atualizacao - criacao) / (1000 * 60 * 60)
-        return acc + diferencaHoras
-      }, 0)
-      const tempoMedioAuditoria = notasComTempo.length > 0
-        ? tempoTotalHoras / notasComTempo.length
-        : 0
+      // 6. Tempo Médio de Auditoria (em horas) - Usando apenas created_at por enquanto
+      const notasComTempo = notasFiltradas.filter(n => n.created_at)
+      const tempoMedioAuditoria = 0 // Calculado quando tivermos campo updated_at na tabela
 
       setData({
         faturamentoMensal,
