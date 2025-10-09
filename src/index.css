@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dashboard de Auditoria Fiscal - Design System 
+Todas as cores devem ser HSL para suporte completo a temas.
+*/
+
+@layer base {
+  :root {
+    /* Light Mode Colors */
+    --background: 0 0% 100%;
+    --background-secondary: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Cards & Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --card-hover: 210 40% 98%;
+
+    /* Popovers & Dialogs */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Brand Colors - Saquetto Blue */
+    --primary: 204 100% 37%;
+    --primary-foreground: 0 0% 98%;
+    --primary-muted: 204 100% 50%;
+    --primary-dark: 204 100% 25%;
+
+    /* Secondary & Muted - Saquetto Green */
+    --secondary: 142 69% 42%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 204 15% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Semantic Colors - Saquetto Green */
+    --success: 142 69% 42%;
+    --success-foreground: 0 0% 98%;
+    --success-muted: 142 69% 96%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    --warning-muted: 38 92% 95%;
+    
+    /* Warning gradients and shadows */
+    --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning) / 0.8));
+    --shadow-warning: 0 4px 20px -4px hsl(var(--warning) / 0.3);
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-muted: 0 84% 96%;
+
+    /* Accent Colors for Charts */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 98%;
+    --accent-2: 142 76% 36%;
+    --accent-3: 38 92% 50%;
+    --accent-4: 280 65% 60%;
+    --accent-5: 200 95% 55%;
+
+    /* Borders & Inputs */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 217 91% 60%;
+
+    /* Layout & Spacing */
+    --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+
+    /* Gradients for Modern Look */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success) / 0.8));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(var(--card-hover)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background-secondary)) 100%);
+
+    /* Shadows & Effects */
+    --shadow-elegant: 0 10px 40px -15px hsl(var(--primary) / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.25);
+    --shadow-success: 0 4px 20px -4px hsl(var(--success) / 0.3);
+
+    /* Typography Scale */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Dark Mode Colors */
+    --background: 240 10% 3.9%;
+    --background-secondary: 240 10% 6%;
+    --foreground: 0 0% 98%;
+
+    /* Cards & Surfaces */
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    --card-hover: 240 10% 8%;
+
+    /* Popovers & Dialogs */
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Secondary & Muted */
+    --secondary: 240 4.8% 8%;
+    --secondary-foreground: 240 5.9% 90%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
+
+    /* Borders & Inputs */
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Custom Scrollbar Styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: var(--radius);
+    transition: var(--transition-fast);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.3);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--primary) / 0.4);
+  }
+  
+  /* Smooth scroll behavior */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+}
