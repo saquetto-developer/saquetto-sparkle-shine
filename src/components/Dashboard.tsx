@@ -392,34 +392,6 @@ export function Dashboard() {
                     <NCMAlertsList limit={10} />
                   </div>
 
-                  {/* Tributos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-                    <MetricCard
-                      title="Total ICMS"
-                      value={`R$ ${currentData.totalIcms.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                      variant="accent"
-                      size="sm"
-                    />
-                    <MetricCard
-                      title="Total PIS"
-                      value={`R$ ${currentData.totalPis.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                      variant="accent"
-                      size="sm"
-                    />
-                    <MetricCard
-                      title="Total COFINS"
-                      value={`R$ ${currentData.totalCofins.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                      variant="accent"
-                      size="sm"
-                    />
-                    <MetricCard
-                      title="Total IPI"
-                      value={`R$ ${currentData.totalIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                      variant="accent"
-                      size="sm"
-                    />
-                  </div>
-
                   {/* Tax Regime Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
                     <MetricCard
