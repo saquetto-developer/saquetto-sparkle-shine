@@ -2,7 +2,7 @@
 
 ## [Unreleased] - 2025-10-08
 
-### 🔒 Segurança
+### 🔒 Seguranca
 
 - **CRÍTICO**: Removidas credenciais hardcoded do código
   - Credenciais do Supabase agora são lidas de variáveis de ambiente
