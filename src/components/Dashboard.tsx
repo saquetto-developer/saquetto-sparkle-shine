@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  TrendingUp, 
-  FileText, 
-  CheckCircle, 
-  XCircle, 
+import {
+  TrendingUp,
+  FileText,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   DollarSign,
   Building2,
   BarChart3,
   Calendar,
-  Receipt
+  Receipt,
+  Download
 } from 'lucide-react';
 import { MetricCard } from './MetricCard';
 import { HeroMetricCard } from './HeroMetricCard';
@@ -29,6 +30,8 @@ import { NCMAlertsList } from './NCMAlertsList';
 import { filterByTaxRegime, type TaxRegime } from '@/lib/taxRegimeUtils';
 import { calcularMetricas, getEmptyMetrics } from '@/lib/dashboardMetrics';
 import type { NotaFiscal, DashboardMetrics } from '@/types/notaFiscal';
+import { exportToPDF, formatFilename } from '@/lib/pdfExport';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardData extends DashboardMetrics {
   topClientes: Array<{ cliente: string; total: number; valor: number }>;
@@ -52,6 +55,32 @@ export function Dashboard() {
 
   const handleCardClick = (situacao: 'Aprovado' | 'Alerta' | 'Reprovado') => {
     navigate(`/notas-fiscais?situacao=${situacao}`);
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const filename = formatFilename('Dashboard_Saquetto');
+      const title = `Dashboard - ${filterType === 'consolidado' ? 'Consolidado' : filterType === 'saquetto' ? 'Saquetto Industrial' : 'Clientes'}`;
+
+      await exportToPDF('dashboard-content', {
+        filename,
+        title,
+        orientation: 'landscape',
+        pageSize: 'a4'
+      });
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: `O arquivo ${filename}.pdf foi baixado.`,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o arquivo PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const loadDashboardData = async () => {
@@ -198,6 +227,18 @@ export function Dashboard() {
                     <FileText className="w-4 h-4 mr-2" />
                     Notas Fiscais
                   </Button>
+                  {activeView === 'dashboard' && (
+                    <Button
+                      variant="outline"
+                      onClick={handleExportPDF}
+                      size="sm"
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Exportar PDF</span>
+                      <span className="sm:hidden">PDF</span>
+                    </Button>
+                  )}
                 </div>
               </div>
               
@@ -290,7 +331,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 md:p-8">
+      <div id="dashboard-content" className="max-w-7xl mx-auto p-6 md:p-8">
         {activeView === 'dashboard' ? (
           <>
             {(() => {

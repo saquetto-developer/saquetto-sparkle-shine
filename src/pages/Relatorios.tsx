@@ -46,6 +46,7 @@ import RelatorioProdutos from '@/components/RelatorioProdutos'
 import RelatorioClientes from '@/components/RelatorioClientes'
 import RelatorioGeografico from '@/components/RelatorioGeografico'
 import RelatorioTendencias from '@/components/RelatorioTendencias'
+import { exportToPDF, formatFilename } from '@/lib/pdfExport'
 
 interface RelatorioData {
   faturamentoMensal: Array<{ mes: string; valor: number; quantidade: number }>
@@ -535,6 +536,32 @@ export default function Relatorios() {
     }).format(value)
   }
 
+  const handleExportPDF = async () => {
+    try {
+      const filename = formatFilename(`Relatorio_Fiscal_${filtroAno}`);
+      const title = `Relatório Fiscal ${filtroAno} - ${tipoRelatorio.charAt(0).toUpperCase() + tipoRelatorio.slice(1)}`;
+
+      await exportToPDF('relatorios-content', {
+        filename,
+        title,
+        orientation: 'portrait',
+        pageSize: 'a4'
+      });
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: `O arquivo ${filename}.pdf foi baixado.`,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o arquivo PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  }
+
   const exportarRelatorio = () => {
     if (!data) return
     
@@ -618,20 +645,30 @@ export default function Relatorios() {
           </Select>
         </div>
 
-        <Button onClick={exportarRelatorio} className="w-fit">
-          <Download className="h-4 w-4 mr-2" />
-          Exportar Relatório
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={exportarRelatorio} variant="outline" className="w-fit">
+            <Download className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Exportar CSV</span>
+            <span className="sm:hidden">CSV</span>
+          </Button>
+
+          <Button onClick={handleExportPDF} className="w-fit">
+            <Download className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Exportar PDF</span>
+            <span className="sm:hidden">PDF</span>
+          </Button>
+        </div>
       </div>
 
       {data && (
-        <RelatorioTabs 
-          data={data} 
-          formatCurrency={formatCurrency}
-        >
-          {{
-            visaoGeral: (
-              <div className="space-y-6">
+        <div id="relatorios-content">
+          <RelatorioTabs
+            data={data}
+            formatCurrency={formatCurrency}
+          >
+            {{
+              visaoGeral: (
+                <div className="space-y-6">
                 {/* Métricas Principais */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="bg-gradient-to-br from-blue-500/10 to-transparent transition-all duration-300 hover:shadow-lg">
@@ -897,7 +934,8 @@ export default function Relatorios() {
               />
             )
           }}
-        </RelatorioTabs>
+          </RelatorioTabs>
+        </div>
       )}
     </div>
   )
