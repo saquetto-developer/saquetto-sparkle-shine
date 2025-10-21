@@ -383,7 +383,7 @@ export default function NotasFiscais() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-3 md:p-6">
         <div className="mb-6">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-96" />
@@ -398,10 +398,10 @@ export default function NotasFiscais() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Notas Fiscais</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Notas Fiscais</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
           Visualize e gerencie todas as notas fiscais processadas
         </p>
       </div>
@@ -411,10 +411,11 @@ export default function NotasFiscais() {
         <div className="mb-4">
           <Badge
             variant="secondary"
-            className="gap-2 px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
+            className="gap-2 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors"
           >
             <Filter className="w-3 h-3" />
-            Filtro ativo: <span className="font-semibold">{filters.situacao}</span>
+            <span className="hidden sm:inline">Filtro ativo:</span>
+            <span className="font-semibold">{filters.situacao}</span>
             <button
               onClick={() => {
                 setFilters(prev => ({ ...prev, situacao: 'all' }))
@@ -430,18 +431,18 @@ export default function NotasFiscais() {
       )}
 
       {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-6 space-y-3 md:space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Buscar por número da nota ou cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11 md:h-10"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           <Select value={filters.cliente} onValueChange={(value) => setFilters(prev => ({ ...prev, cliente: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Todos os clientes" />

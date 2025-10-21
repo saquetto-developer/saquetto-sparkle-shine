@@ -161,13 +161,13 @@ export default function ErrosAlertas() {
     switch (tipo) {
       case 'NCM Inválido':
       case 'CFOP Inválido':
-        return <XCircle className="h-4 w-4 text-destructive" />
+        return <AlertCircle className="h-4 w-4 text-primary" />
       case 'PIS Incorreto':
       case 'COFINS Divergente':
       case 'ICMS Divergente':
-        return <AlertTriangle className="h-4 w-4 text-warning" />
+        return <AlertTriangle className="h-4 w-4 text-blue-600" />
       default:
-        return <AlertCircle className="h-4 w-4 text-muted-foreground" />
+        return <AlertCircle className="h-4 w-4 text-blue-500" />
     }
   }
 
@@ -175,7 +175,7 @@ export default function ErrosAlertas() {
     switch (tipo) {
       case 'NCM Inválido':
       case 'CFOP Inválido':
-        return 'destructive'
+        return 'default'
       case 'PIS Incorreto':
       case 'COFINS Divergente':
       case 'ICMS Divergente':
@@ -244,18 +244,18 @@ export default function ErrosAlertas() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+    <div className="p-3 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
       {/* Enhanced Header */}
-      <div className="mb-8">
-        <div className="flex items-start gap-4 mb-3">
-          <div className="p-3 bg-gradient-to-br from-destructive/10 to-destructive/5 rounded-xl border border-destructive/20">
-            <AlertTriangle className="h-7 w-7 text-destructive" />
+      <div className="mb-6 md:mb-8">
+        <div className="flex items-start gap-3 md:gap-4">
+          <div className="p-2 md:p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg md:rounded-xl border border-primary/20">
+            <AlertTriangle className="h-5 w-5 md:h-7 md:w-7 text-primary" />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-1 md:mb-2">
               Erros e Alertas
             </h1>
-            <p className="text-muted-foreground text-base">
+            <p className="text-muted-foreground text-sm md:text-base">
               Análise de inconsistências fiscais e problemas detectados automaticamente
             </p>
           </div>
@@ -263,25 +263,25 @@ export default function ErrosAlertas() {
       </div>
 
       {/* Enhanced Search and Filters */}
-      <div className="mb-8 space-y-4">
+      <div className="mb-6 md:mb-8 space-y-3 md:space-y-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+          <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 md:h-5 md:w-5" />
           <Input
-            placeholder="Buscar por número da nota, cliente ou descrição do erro..."
+            placeholder="Buscar por número da nota, cliente ou erro..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-12 text-base rounded-xl border-2 focus-visible:ring-2 transition-all"
+            className="pl-10 md:pl-12 h-11 md:h-12 text-sm md:text-base rounded-lg md:rounded-xl border-2 focus-visible:ring-2 transition-all"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">Filtros:</span>
           </div>
 
           <Select value={filters.tipoErro} onValueChange={(value) => setFilters(prev => ({ ...prev, tipoErro: value }))}>
-            <SelectTrigger className="w-52 h-10 rounded-lg">
+            <SelectTrigger className="w-full md:w-52 h-10 rounded-lg">
               <SelectValue placeholder="Tipo de erro" />
             </SelectTrigger>
             <SelectContent>
@@ -295,7 +295,7 @@ export default function ErrosAlertas() {
           </Select>
 
           <Select value={filters.cliente} onValueChange={(value) => setFilters(prev => ({ ...prev, cliente: value }))}>
-            <SelectTrigger className="w-64 h-10 rounded-lg">
+            <SelectTrigger className="w-full md:w-64 h-10 rounded-lg">
               <SelectValue placeholder="Cliente" />
             </SelectTrigger>
             <SelectContent>
@@ -308,20 +308,20 @@ export default function ErrosAlertas() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            onClick={clearFilters}
-            className="h-10 rounded-lg"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Limpar
-          </Button>
+          <div className="flex gap-3 md:gap-2">
+            <Button
+              variant="outline"
+              onClick={clearFilters}
+              className="flex-1 md:flex-none h-10 rounded-lg"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Limpar
+            </Button>
 
-          <div className="ml-auto">
             <Button
               variant="default"
               onClick={exportErros}
-              className="h-10 rounded-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80"
+              className="flex-1 md:flex-none md:ml-auto h-10 rounded-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80"
             >
               <Download className="h-4 w-4 mr-2" />
               Exportar
@@ -331,17 +331,16 @@ export default function ErrosAlertas() {
       </div>
 
       {/* Enhanced Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="overflow-hidden border-2 hover:border-destructive/50 transition-all hover:shadow-lg group">
-          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+        <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total de Erros</CardTitle>
-            <div className="p-2 bg-destructive/10 rounded-lg group-hover:scale-110 transition-transform">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+            <div className="p-2 bg-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+              <AlertTriangle className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="text-3xl font-bold text-destructive">{filteredErros.length}</div>
+            <div className="text-3xl font-bold text-primary">{filteredErros.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {filteredErros.length === erros.length ? 'Total no sistema' : 'Após filtros aplicados'}
             </p>
@@ -350,19 +349,13 @@ export default function ErrosAlertas() {
 
         {tiposErro.slice(0, 3).map((tipo, index) => {
           const count = filteredErros.filter(e => e.tipo_erro === tipo).length
-          const bgColors = [
-            'from-orange-500/10 to-transparent',
-            'from-yellow-500/10 to-transparent',
-            'from-blue-500/10 to-transparent'
-          ]
           const iconBgColors = [
-            'bg-orange-500/10',
-            'bg-yellow-500/10',
-            'bg-blue-500/10'
+            'bg-blue-500/10',
+            'bg-cyan-500/10',
+            'bg-indigo-500/10'
           ]
           return (
             <Card key={tipo} className="overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
-              <div className={`absolute inset-0 bg-gradient-to-br ${bgColors[index]} opacity-0 group-hover:opacity-100 transition-opacity`} />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative">
                 <CardTitle className="text-sm font-medium text-muted-foreground line-clamp-1">
                   {tipo}
@@ -455,7 +448,7 @@ export default function ErrosAlertas() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={getErrorColor(erro.tipo_erro) as "destructive" | "secondary" | "outline"}
+                          variant={getErrorColor(erro.tipo_erro) as "default" | "secondary" | "outline"}
                           className="font-medium"
                         >
                           <span className="mr-1.5">{getErrorIcon(erro.tipo_erro)}</span>
@@ -564,8 +557,8 @@ export default function ErrosAlertas() {
                                     {getErrorIcon(selectedErro.tipo_erro)}
                                     Erro Detectado: {selectedErro.tipo_erro}
                                   </h3>
-                                  <div className="bg-destructive/10 border-2 border-destructive/30 p-5 rounded-xl">
-                                    <p className="text-sm text-destructive leading-relaxed font-medium">
+                                  <div className="bg-primary/10 border-2 border-primary/30 p-5 rounded-xl">
+                                    <p className="text-sm text-primary leading-relaxed font-medium">
                                       {selectedErro.explicacao}
                                     </p>
                                   </div>

@@ -170,28 +170,30 @@ export function Dashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-6">
+            <div className="flex flex-col gap-3 md:gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     Auditoria Fiscal
                   </h1>
-                  <p className="text-muted-foreground">Dashboard de análise de notas fiscais</p>
+                  <p className="text-muted-foreground text-sm md:text-base">Dashboard de análise de notas fiscais</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button 
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
                     variant={activeView === 'dashboard' ? 'default' : 'outline'}
                     onClick={() => setActiveView('dashboard')}
                     size="sm"
+                    className="flex-1 sm:flex-none"
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Dashboard
                   </Button>
-                  <Button 
+                  <Button
                     variant={activeView === 'notas' ? 'default' : 'outline'}
                     onClick={() => setActiveView('notas')}
                     size="sm"
+                    className="flex-1 sm:flex-none"
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Notas Fiscais
@@ -201,73 +203,86 @@ export function Dashboard() {
               
               {activeView === 'dashboard' && (
                 <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                    <Button
                       variant={filterType === 'consolidado' ? 'default' : 'outline'}
                       onClick={() => setFilterType('consolidado')}
                       size="sm"
+                      className="w-full sm:w-auto justify-start sm:justify-center"
                     >
                       <Building2 className="w-4 h-4 mr-2" />
                       Consolidado
                     </Button>
-                    <Button 
+                    <Button
                       variant={filterType === 'saquetto' ? 'default' : 'outline'}
                       onClick={() => setFilterType('saquetto')}
                       size="sm"
+                      className="w-full sm:w-auto justify-between sm:justify-center"
                     >
-                      <Building2 className="w-4 h-4 mr-2" />
-                      Saquetto Industrial
+                      <span className="flex items-center">
+                        <Building2 className="w-4 h-4 mr-2" />
+                        Saquetto Industrial
+                      </span>
                       <Badge variant="secondary" className="ml-2">
                         {data?.saquetto.totalNotas || 0}
                       </Badge>
                     </Button>
-                    <Button 
+                    <Button
                       variant={filterType === 'clientes' ? 'default' : 'outline'}
                       onClick={() => setFilterType('clientes')}
                       size="sm"
+                      className="w-full sm:w-auto justify-between sm:justify-center"
                     >
-                      <Building2 className="w-4 h-4 mr-2" />
-                      Clientes
+                      <span className="flex items-center">
+                        <Building2 className="w-4 h-4 mr-2" />
+                        Clientes
+                      </span>
                       <Badge variant="secondary" className="ml-2">
                         {data?.clientes.totalNotas || 0}
                       </Badge>
                     </Button>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-sm text-muted-foreground self-center">Regime Tributário:</span>
-                    <Button 
-                      variant={taxRegimeFilter === 'all' ? 'default' : 'outline'}
-                      onClick={() => setTaxRegimeFilter('all')}
-                      size="sm"
-                    >
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Todos
-                    </Button>
-                    <Button 
-                      variant={taxRegimeFilter === 'simples' ? 'default' : 'outline'}
-                      onClick={() => setTaxRegimeFilter('simples')}
-                      size="sm"
-                    >
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Simples Nacional
-                    </Button>
-                    <Button 
-                      variant={taxRegimeFilter === 'presumido' ? 'default' : 'outline'}
-                      onClick={() => setTaxRegimeFilter('presumido')}
-                      size="sm"
-                    >
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Presumido/Real
-                    </Button>
-                    <Button 
-                      variant={taxRegimeFilter === 'sem_informacao' ? 'default' : 'outline'}
-                      onClick={() => setTaxRegimeFilter('sem_informacao')}
-                      size="sm"
-                    >
-                      <Receipt className="w-4 h-4 mr-2" />
-                      Sem Informação
-                    </Button>
+
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm text-muted-foreground">Regime Tributário:</span>
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                      <Button
+                        variant={taxRegimeFilter === 'all' ? 'default' : 'outline'}
+                        onClick={() => setTaxRegimeFilter('all')}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Todos
+                      </Button>
+                      <Button
+                        variant={taxRegimeFilter === 'simples' ? 'default' : 'outline'}
+                        onClick={() => setTaxRegimeFilter('simples')}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Simples Nacional
+                      </Button>
+                      <Button
+                        variant={taxRegimeFilter === 'presumido' ? 'default' : 'outline'}
+                        onClick={() => setTaxRegimeFilter('presumido')}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Presumido/Real
+                      </Button>
+                      <Button
+                        variant={taxRegimeFilter === 'sem_informacao' ? 'default' : 'outline'}
+                        onClick={() => setTaxRegimeFilter('sem_informacao')}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Sem Informação
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

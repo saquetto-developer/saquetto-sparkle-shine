@@ -60,6 +60,9 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
     const isActive = location.pathname === item.url
     const Icon = item.icon
 
+    // On mobile, always show titles regardless of collapsed state
+    const showTitle = isMobile || !collapsed
+
     const linkContent = (
       <NavLink
         key={item.title}
@@ -67,14 +70,14 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
         onClick={handleItemClick}
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          collapsed ? "justify-center" : "",
-          isActive 
-            ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
+          collapsed && !isMobile ? "justify-center" : "",
+          isActive
+            ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
-        {!collapsed && <span>{item.title}</span>}
+        {showTitle && <span>{item.title}</span>}
       </NavLink>
     )
 
