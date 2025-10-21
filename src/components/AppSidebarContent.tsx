@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { useLocation, NavLink } from "react-router-dom"
-import { 
-  BarChart3, 
-  Users, 
-  FileText, 
+import {
+  BarChart3,
+  Users,
+  FileText,
   Building2,
   ChartLine,
+  AlertTriangle,
   LogOut
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,6 +20,7 @@ import saquettoLogo from "@/assets/saquetto-logo.png"
 const navigation = [
   { title: "Dashboard", url: "/", icon: BarChart3 },
   { title: "Notas Fiscais", url: "/notas-fiscais", icon: FileText },
+  { title: "Erros e Alertas", url: "/erros-alertas", icon: AlertTriangle },
   { title: "Clientes", url: "/clientes", icon: Users },
   { title: "Fornecedores", url: "/fornecedores", icon: Building2 },
   { title: "Relatórios", url: "/relatorios", icon: ChartLine },

@@ -166,6 +166,23 @@ export default function NotasFiscais() {
     }
   }, [searchParams])
 
+  // Handle notaId parameter to open specific nota dialog
+  useEffect(() => {
+    const notaIdParam = searchParams.get('notaId')
+    if (notaIdParam && notas.length > 0) {
+      const notaId = parseInt(notaIdParam, 10)
+      const nota = notas.find(n => n.id === notaId)
+      if (nota) {
+        handleNotaSelect(nota)
+        // Remove the notaId param after opening
+        const newSearchParams = new URLSearchParams(searchParams)
+        newSearchParams.delete('notaId')
+        setSearchParams(newSearchParams, { replace: true })
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, notas])
+
   useEffect(() => {
     fetchNotas()
     fetchFilterOptions()

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -57,6 +58,7 @@ interface ErroNota {
 }
 
 export default function ErrosAlertas() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [erros, setErros] = useState<ErroNota[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -68,6 +70,17 @@ export default function ErrosAlertas() {
 
   const [tiposErro, setTiposErro] = useState<string[]>([])
   const [clientes, setClientes] = useState<string[]>([])
+
+  // Read URL params and apply filters
+  useEffect(() => {
+    const tipoParam = searchParams.get('tipo')
+    if (tipoParam) {
+      setFilters(prev => ({
+        ...prev,
+        tipoErro: tipoParam
+      }))
+    }
+  }, [searchParams])
 
   useEffect(() => {
     fetchErros()

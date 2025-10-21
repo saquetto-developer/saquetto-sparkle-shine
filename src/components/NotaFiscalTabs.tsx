@@ -9,8 +9,10 @@ import {
   ReceiptText,
   Truck,
   CreditCard,
+  ShieldCheck,
 } from 'lucide-react';
 import { NotaFiscalSection, DataGrid, type SectionField } from './NotaFiscalSection';
+import { ValidationPanel } from './ValidationPanel';
 import {
   formatCurrency,
   formatPercentage,
@@ -194,8 +196,12 @@ export function NotaFiscalTabs({ nota }: NotaFiscalTabsProps) {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="info" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7 h-auto">
+      <Tabs defaultValue="validacao" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-8 h-auto">
+          <TabsTrigger value="validacao" className="text-xs gap-1 py-2">
+            <ShieldCheck className="h-3 w-3" />
+            <span className="hidden sm:inline">Validação</span>
+          </TabsTrigger>
           <TabsTrigger value="info" className="text-xs gap-1 py-2">
             <Info className="h-3 w-3" />
             <span className="hidden sm:inline">Info</span>
@@ -225,6 +231,11 @@ export function NotaFiscalTabs({ nota }: NotaFiscalTabsProps) {
             <span className="hidden sm:inline">Financeiro</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Tab: Validação Automática */}
+        <TabsContent value="validacao" className="mt-4">
+          <ValidationPanel nota={nota as any} />
+        </TabsContent>
 
         {/* Tab: Informações Gerais */}
         <TabsContent value="info" className="space-y-6 mt-4">

@@ -58,7 +58,7 @@ export function useDragScroll(options: DragScrollOptions = {}) {
       
       // Momentum scrolling
       if (smooth && (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1)) {
-        let currentVelocity = { ...velocity };
+        const currentVelocity = { ...velocity };
         
         const momentum = () => {
           const friction = 0.95;

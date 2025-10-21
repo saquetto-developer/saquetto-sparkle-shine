@@ -19,6 +19,7 @@ const Clientes = lazy(() => import("./pages/Clientes"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const NotasFiscais = lazy(() => import("./pages/NotasFiscais"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
+const ErrosAlertas = lazy(() => import("./pages/ErrosAlertas"));
 
 // Loading component for suspense fallback
 const PageLoader = () => (
@@ -87,6 +88,15 @@ const App = () => (
                     <Layout>
                       <Suspense fallback={<PageLoader />}>
                         <Relatorios />
+                      </Suspense>
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/erros-alertas" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Suspense fallback={<PageLoader />}>
+                        <ErrosAlertas />
                       </Suspense>
                     </Layout>
                   </ProtectedRoute>
