@@ -220,44 +220,68 @@ export default function ErrosAlertas() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="mb-6">
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-4 w-96" />
+      <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+        <div className="mb-8">
+          <Skeleton className="h-10 w-64 mb-3" />
+          <Skeleton className="h-5 w-96" />
         </div>
-        <div className="grid gap-4">
-          {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
+        <div className="mb-6">
+          <Skeleton className="h-12 w-full mb-4" />
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-xl" />
           ))}
         </div>
+        <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Erros e Alertas</h1>
-        <p className="text-muted-foreground">
-          Análise de inconsistências fiscais e problemas detectados
-        </p>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+      {/* Enhanced Header */}
+      <div className="mb-8">
+        <div className="flex items-start gap-4 mb-3">
+          <div className="p-3 bg-gradient-to-br from-destructive/10 to-destructive/5 rounded-xl border border-destructive/20">
+            <AlertTriangle className="h-7 w-7 text-destructive" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">
+              Erros e Alertas
+            </h1>
+            <p className="text-muted-foreground text-base">
+              Análise de inconsistências fiscais e problemas detectados automaticamente
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
+      {/* Enhanced Search and Filters */}
+      <div className="mb-8 space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input
-            placeholder="Buscar por número da nota, cliente ou erro..."
+            placeholder="Buscar por número da nota, cliente ou descrição do erro..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-12 h-12 text-base rounded-xl border-2 focus-visible:ring-2 transition-all"
           />
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Filtros:</span>
+          </div>
+
           <Select value={filters.tipoErro} onValueChange={(value) => setFilters(prev => ({ ...prev, tipoErro: value }))}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-52 h-10 rounded-lg">
               <SelectValue placeholder="Tipo de erro" />
             </SelectTrigger>
             <SelectContent>
@@ -271,7 +295,7 @@ export default function ErrosAlertas() {
           </Select>
 
           <Select value={filters.cliente} onValueChange={(value) => setFilters(prev => ({ ...prev, cliente: value }))}>
-            <SelectTrigger className="w-64">
+            <SelectTrigger className="w-64 h-10 rounded-lg">
               <SelectValue placeholder="Cliente" />
             </SelectTrigger>
             <SelectContent>
@@ -284,176 +308,318 @@ export default function ErrosAlertas() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline" onClick={clearFilters}>
+          <Button
+            variant="outline"
+            onClick={clearFilters}
+            className="h-10 rounded-lg"
+          >
             <Filter className="h-4 w-4 mr-2" />
             Limpar
           </Button>
 
-          <Button variant="outline" onClick={exportErros}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+          <div className="ml-auto">
+            <Button
+              variant="default"
+              onClick={exportErros}
+              className="h-10 rounded-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Erros</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
+      {/* Enhanced Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card className="overflow-hidden border-2 hover:border-destructive/50 transition-all hover:shadow-lg group">
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Erros</CardTitle>
+            <div className="p-2 bg-destructive/10 rounded-lg group-hover:scale-110 transition-transform">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{filteredErros.length}</div>
+          <CardContent className="relative">
+            <div className="text-3xl font-bold text-destructive">{filteredErros.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {filteredErros.length === erros.length ? 'Total no sistema' : 'Após filtros aplicados'}
+            </p>
           </CardContent>
         </Card>
-        
-        {tiposErro.slice(0, 3).map(tipo => {
+
+        {tiposErro.slice(0, 3).map((tipo, index) => {
           const count = filteredErros.filter(e => e.tipo_erro === tipo).length
+          const bgColors = [
+            'from-orange-500/10 to-transparent',
+            'from-yellow-500/10 to-transparent',
+            'from-blue-500/10 to-transparent'
+          ]
+          const iconBgColors = [
+            'bg-orange-500/10',
+            'bg-yellow-500/10',
+            'bg-blue-500/10'
+          ]
           return (
-            <Card key={tipo}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{tipo}</CardTitle>
-                {getErrorIcon(tipo)}
+            <Card key={tipo} className="overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className={`absolute inset-0 bg-gradient-to-br ${bgColors[index]} opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative">
+                <CardTitle className="text-sm font-medium text-muted-foreground line-clamp-1">
+                  {tipo}
+                </CardTitle>
+                <div className={`p-2 ${iconBgColors[index]} rounded-lg group-hover:scale-110 transition-transform`}>
+                  {getErrorIcon(tipo)}
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{count}</div>
+              <CardContent className="relative">
+                <div className="text-3xl font-bold">{count}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {((count / filteredErros.length) * 100).toFixed(0)}% do total
+                </p>
               </CardContent>
             </Card>
           )
         })}
       </div>
 
-      {/* Errors Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Erros e Alertas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Documento</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Operação</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead>Tipo de Erro</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredErros.slice(0, 50).map((erro, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-mono text-sm">
-                    {erro.numero_nfe}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {erro.destinatario_razao_social || 'N/A'}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {erro.natureza_operacao}
-                  </TableCell>
-                  <TableCell>
-                    {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    }).format(parseFloat(erro.valor_total_nfe || '0'))}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {erro.descricao_produto}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getErrorColor(erro.tipo_erro) as "destructive" | "secondary" | "outline"}>
-                      {erro.tipo_erro}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedErro(erro)}
-                        >
-                          Detalhes
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>
-                            Análise Fiscal - {selectedErro?.numero_nfe}
-                          </DialogTitle>
-                        </DialogHeader>
-                        {selectedErro && (
-                          <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <h3 className="font-semibold mb-2">Informações do Documento</h3>
-                                <div className="space-y-2 text-sm">
-                                  <div><span className="font-medium">Número NFe:</span> {selectedErro.numero_nfe}</div>
-                                  <div><span className="font-medium">Data:</span> {selectedErro.data_emissao ? new Date(selectedErro.data_emissao).toLocaleDateString('pt-BR') : 'N/A'}</div>
-                                  <div><span className="font-medium">Valor:</span> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(selectedErro.valor_total_nfe || '0'))}</div>
-                                  <div><span className="font-medium">Cliente:</span> {selectedErro.destinatario_razao_social}</div>
-                                  <div><span className="font-medium">Operação:</span> {selectedErro.natureza_operacao}</div>
-                                </div>
-                              </div>
-
-                              <div>
-                                <h3 className="font-semibold mb-2">Dados Fiscais</h3>
-                                <div className="space-y-2 text-sm">
-                                  <div><span className="font-medium">NCM:</span> {selectedErro.ncm}</div>
-                                  <div><span className="font-medium">CFOP:</span> {selectedErro.cfop}</div>
-                                  <div><span className="font-medium">CST ICMS:</span> {selectedErro.icms_cst}</div>
-                                  <div><span className="font-medium">CST PIS:</span> {selectedErro.pis_cst}</div>
-                                  <div><span className="font-medium">CST COFINS:</span> {selectedErro.cofins_cst}</div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div>
-                              <h3 className="font-semibold mb-2">Produto</h3>
-                              <p className="text-sm bg-muted p-3 rounded-lg">
-                                {selectedErro.descricao_produto}
-                              </p>
-                            </div>
-
-                            <div>
-                              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                                {getErrorIcon(selectedErro.tipo_erro)}
-                                Erro Detectado: {selectedErro.tipo_erro}
-                              </h3>
-                              <div className="bg-destructive/5 border border-destructive/30 p-4 rounded-lg">
-                                <p className="text-sm text-destructive">
-                                  {selectedErro.explicacao}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <h3 className="font-semibold mb-2">Informações Técnicas</h3>
-                              <div className="space-y-2 text-sm">
-                                <div><span className="font-medium">Chave de Acesso:</span> <span className="font-mono text-xs">{selectedErro.chave_acesso}</span></div>
-                                <div><span className="font-medium">Status SEFAZ:</span> {selectedErro.status_autorizacao}</div>
-                                <div><span className="font-medium">Emitente:</span> {selectedErro.emitente_razao_social}</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {filteredErros.length > 50 && (
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Mostrando 50 de {filteredErros.length} erros. Use os filtros para refinar a busca.
+      {/* Enhanced Errors Table */}
+      {filteredErros.length === 0 ? (
+        <Card className="border-2 border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16 px-4">
+            <div className="p-4 bg-muted rounded-full mb-4">
+              <AlertCircle className="h-12 w-12 text-muted-foreground" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <h3 className="text-xl font-semibold mb-2">Nenhum erro encontrado</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-6">
+              {searchTerm || filters.tipoErro !== 'all' || filters.cliente !== 'all'
+                ? 'Tente ajustar os filtros ou termos de busca para encontrar resultados.'
+                : 'Não há erros ou alertas registrados no momento.'}
+            </p>
+            {(searchTerm || filters.tipoErro !== 'all' || filters.cliente !== 'all') && (
+              <Button variant="outline" onClick={() => {
+                setSearchTerm('')
+                clearFilters()
+              }}>
+                Limpar todos os filtros
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-2 rounded-xl overflow-hidden">
+          <CardHeader className="bg-muted/30 border-b-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Lista de Erros e Alertas</CardTitle>
+              <Badge variant="secondary" className="text-sm px-3 py-1">
+                {filteredErros.length} {filteredErros.length === 1 ? 'erro' : 'erros'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="font-semibold">Documento</TableHead>
+                    <TableHead className="font-semibold">Cliente</TableHead>
+                    <TableHead className="font-semibold">Operação</TableHead>
+                    <TableHead className="font-semibold">Valor</TableHead>
+                    <TableHead className="font-semibold">Produto</TableHead>
+                    <TableHead className="font-semibold">Tipo de Erro</TableHead>
+                    <TableHead className="text-right font-semibold">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredErros.slice(0, 50).map((erro, index) => (
+                    <TableRow
+                      key={index}
+                      className={`hover:bg-muted/50 transition-colors ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
+                    >
+                      <TableCell className="font-mono text-sm font-medium">
+                        {erro.numero_nfe}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {erro.destinatario_razao_social || 'N/A'}
+                      </TableCell>
+                      <TableCell className="max-w-[180px] truncate text-sm">
+                        {erro.natureza_operacao}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(parseFloat(erro.valor_total_nfe || '0'))}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate text-sm">
+                        {erro.descricao_produto}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={getErrorColor(erro.tipo_erro) as "destructive" | "secondary" | "outline"}
+                          className="font-medium"
+                        >
+                          <span className="mr-1.5">{getErrorIcon(erro.tipo_erro)}</span>
+                          {erro.tipo_erro}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedErro(erro)}
+                              className="hover:bg-primary/10 hover:text-primary"
+                            >
+                              Ver detalhes
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                            <DialogHeader className="border-b pb-4">
+                              <DialogTitle className="text-2xl flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                  <AlertTriangle className="h-5 w-5 text-primary" />
+                                </div>
+                                Análise Fiscal - NFe {selectedErro?.numero_nfe}
+                              </DialogTitle>
+                            </DialogHeader>
+                            {selectedErro && (
+                              <div className="space-y-6 pt-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div className="space-y-3">
+                                    <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+                                      <div className="h-1 w-1 rounded-full bg-primary" />
+                                      Informações do Documento
+                                    </h3>
+                                    <div className="space-y-3 text-sm bg-muted/30 p-4 rounded-lg">
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Número NFe:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.numero_nfe}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Data:</span>
+                                        <span className="font-semibold">
+                                          {selectedErro.data_emissao ? new Date(selectedErro.data_emissao).toLocaleDateString('pt-BR') : 'N/A'}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Valor:</span>
+                                        <span className="font-semibold text-green-600">
+                                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(selectedErro.valor_total_nfe || '0'))}
+                                        </span>
+                                      </div>
+                                      <div className="flex flex-col gap-1 pt-2 border-t">
+                                        <span className="text-muted-foreground">Cliente:</span>
+                                        <span className="font-semibold">{selectedErro.destinatario_razao_social}</span>
+                                      </div>
+                                      <div className="flex flex-col gap-1 pt-2 border-t">
+                                        <span className="text-muted-foreground">Operação:</span>
+                                        <span className="font-semibold">{selectedErro.natureza_operacao}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+                                      <div className="h-1 w-1 rounded-full bg-primary" />
+                                      Dados Fiscais
+                                    </h3>
+                                    <div className="space-y-3 text-sm bg-muted/30 p-4 rounded-lg">
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">NCM:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.ncm}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">CFOP:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.cfop}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">CST ICMS:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.icms_cst}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">CST PIS:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.pis_cst}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">CST COFINS:</span>
+                                        <span className="font-semibold font-mono">{selectedErro.cofins_cst}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+                                    <div className="h-1 w-1 rounded-full bg-primary" />
+                                    Produto
+                                  </h3>
+                                  <p className="text-sm bg-muted/30 p-4 rounded-lg leading-relaxed">
+                                    {selectedErro.descricao_produto}
+                                  </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+                                    {getErrorIcon(selectedErro.tipo_erro)}
+                                    Erro Detectado: {selectedErro.tipo_erro}
+                                  </h3>
+                                  <div className="bg-destructive/10 border-2 border-destructive/30 p-5 rounded-xl">
+                                    <p className="text-sm text-destructive leading-relaxed font-medium">
+                                      {selectedErro.explicacao}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2">
+                                    <div className="h-1 w-1 rounded-full bg-primary" />
+                                    Informações Técnicas
+                                  </h3>
+                                  <div className="space-y-3 text-sm bg-muted/30 p-4 rounded-lg">
+                                    <div className="flex flex-col gap-1">
+                                      <span className="text-muted-foreground">Chave de Acesso:</span>
+                                      <span className="font-mono text-xs bg-background p-2 rounded border">
+                                        {selectedErro.chave_acesso}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 border-t">
+                                      <span className="text-muted-foreground">Status SEFAZ:</span>
+                                      <span className="font-semibold">{selectedErro.status_autorizacao}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-1 pt-2 border-t">
+                                      <span className="text-muted-foreground">Emitente:</span>
+                                      <span className="font-semibold">{selectedErro.emitente_razao_social}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {filteredErros.length > 50 && (
+              <div className="border-t-2 bg-muted/30 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Mostrando <span className="font-semibold text-foreground">50</span> de{' '}
+                    <span className="font-semibold text-foreground">{filteredErros.length}</span> erros encontrados
+                  </p>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    Carregar mais
+                    <AlertCircle className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
