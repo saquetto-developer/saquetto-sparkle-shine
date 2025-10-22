@@ -55,15 +55,18 @@ export async function exportToPDF(
   document.body.appendChild(loadingDiv);
 
   try {
-    // Capturar o elemento como canvas com alta qualidade
+    // Capturar o elemento como canvas com qualidade otimizada
     const canvas = await html2canvas(element, {
-      scale: 2, // Alta qualidade
+      scale: 1.5, // Qualidade balanceada (reduzido de 2 para 1.5)
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      ignoreElements: (el) => {
+        // Ignorar elementos sticky/fixed que não devem aparecer no PDF
+        const style = window.getComputedStyle(el);
+        return style.position === 'sticky' || style.position === 'fixed';
+      },
     });
 
     // Configurações do PDF
@@ -94,12 +97,12 @@ export async function exportToPDF(
 
     let position = margin + 20; // Após o header
 
-    // Converter canvas para imagem
-    const imgData = canvas.toDataURL('image/png', 1.0);
+    // Converter canvas para JPEG com compressão otimizada
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
 
     // Se a imagem couber em uma página
     if (imgHeight <= contentHeight) {
-      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
       addFooter(pdf, pageWidth, pageHeight, margin, 1, 1);
     } else {
       // Dividir em múltiplas páginas
@@ -130,10 +133,10 @@ export async function exportToPDF(
             0, 0, canvas.width, sourceHeight
           );
 
-          const pageImgData = tempCanvas.toDataURL('image/png', 1.0);
+          const pageImgData = tempCanvas.toDataURL('image/jpeg', 0.85);
           const pageImgHeight = (sourceHeight * imgWidth) / canvas.width;
 
-          pdf.addImage(pageImgData, 'PNG', margin, position, imgWidth, pageImgHeight);
+          pdf.addImage(pageImgData, 'JPEG', margin, position, imgWidth, pageImgHeight);
         }
 
         addFooter(pdf, pageWidth, pageHeight, margin, pageNumber, totalPages);
