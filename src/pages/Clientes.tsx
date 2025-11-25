@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Search, Users, FileText, DollarSign, AlertCircle, MapPin, Phone, Mail, Eye } from 'lucide-react'
+import { Search, Users, FileText, DollarSign, AlertCircle, MapPin, Phone, Mail, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { NotaFiscalTabs } from '@/components/NotaFiscalTabs'
 import { formatCFOP } from '@/lib/notaFiscalFormatters'
@@ -73,6 +73,10 @@ export default function Clientes() {
   const [loadingNotaDetails, setLoadingNotaDetails] = useState(false)
   const [selectedNotaFull, setSelectedNotaFull] = useState<any>(null)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null)
 
   useEffect(() => {
     fetchClientes()
@@ -306,7 +310,48 @@ export default function Clientes() {
       const matchesStatus = statusFilter === 'todos' || cliente.status === statusFilter
       return matchesSearch && matchesStatus
     })
-    .sort((a, b) => {
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return current.direction === 'asc'
+          ? { key, direction: 'desc' }
+          : null
+      }
+      return { key, direction: 'asc' }
+    })
+  }
+
+  const sortedClientes = useMemo(() => {
+    // Se sortConfig esta ativo, usa ele; senao usa o dropdown sortBy
+    if (sortConfig) {
+      return [...filteredClientes].sort((a, b) => {
+        let aValue: any = a[sortConfig.key as keyof Cliente]
+        let bValue: any = b[sortConfig.key as keyof Cliente]
+
+        // Handle nulls
+        if (aValue === null || aValue === undefined) return 1
+        if (bValue === null || bValue === undefined) return -1
+
+        // Handle numbers
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
+        }
+
+        // String comparison
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          aValue = aValue.toLowerCase()
+          bValue = bValue.toLowerCase()
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    // Fallback para o dropdown sortBy
+    return [...filteredClientes].sort((a, b) => {
       switch (sortBy) {
         case 'nome':
           return a.razao_social.localeCompare(b.razao_social)
@@ -318,6 +363,27 @@ export default function Clientes() {
           return 0
       }
     })
+  }, [filteredClientes, sortConfig, sortBy])
+
+  const SortableHeader = ({ column, label }: { column: string; label: string }) => (
+    <TableHead
+      className="cursor-pointer hover:bg-muted/50 select-none"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortConfig?.key === column ? (
+          sortConfig.direction === 'asc' ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="h-4 w-4 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -459,17 +525,17 @@ export default function Clientes() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>CNPJ</TableHead>
-                <TableHead>Total Notas</TableHead>
-                <TableHead>Faturamento</TableHead>
-                <TableHead>Ticket Médio</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <SortableHeader column="razao_social" label="Cliente" />
+                <SortableHeader column="cnpj" label="CNPJ" />
+                <SortableHeader column="total_notas" label="Total Notas" />
+                <SortableHeader column="valor_total" label="Faturamento" />
+                <SortableHeader column="ticket_medio" label="Ticket Medio" />
+                <SortableHeader column="status" label="Status" />
+                <TableHead className="text-right">Acoes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClientes.slice(0, 50).map((cliente, index) => (
+              {sortedClientes.slice(0, 50).map((cliente, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium max-w-xs truncate">
                     {cliente.razao_social || 'N/A'}
@@ -681,9 +747,9 @@ export default function Clientes() {
               ))}
             </TableBody>
           </Table>
-          {filteredClientes.length > 50 && (
+          {sortedClientes.length > 50 && (
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              Mostrando 50 de {filteredClientes.length} clientes. Use os filtros para refinar.
+              Mostrando 50 de {sortedClientes.length} clientes. Use os filtros para refinar.
             </div>
           )}
         </CardContent>

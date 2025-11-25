@@ -11,15 +11,20 @@ import {
   XCircle,
   AlertTriangle,
   DollarSign,
-  Building2,
   BarChart3,
   Calendar,
   Receipt,
   Download
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MetricCard } from './MetricCard';
 import { HeroMetricCard } from './HeroMetricCard';
-import { InsightsBanner } from './InsightsBanner';
 import { TaxChart } from './TaxChart';
 import { StatusChart } from './StatusChart';
 import { TopClientsChart } from './TopClientsChart';
@@ -199,7 +204,7 @@ export function Dashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-6">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex flex-col gap-3 md:gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
                 <div>
@@ -243,28 +248,24 @@ export function Dashboard() {
               </div>
               
               {activeView === 'dashboard' && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="flex flex-wrap gap-1.5">
                     <Button
                       variant={filterType === 'consolidado' ? 'default' : 'outline'}
                       onClick={() => setFilterType('consolidado')}
                       size="sm"
-                      className="w-full sm:w-auto justify-start sm:justify-center"
+                      className="h-8 px-3 text-xs"
                     >
-                      <Building2 className="w-4 h-4 mr-2" />
                       Consolidado
                     </Button>
                     <Button
                       variant={filterType === 'saquetto' ? 'default' : 'outline'}
                       onClick={() => setFilterType('saquetto')}
                       size="sm"
-                      className="w-full sm:w-auto justify-between sm:justify-center"
+                      className="h-8 px-3 text-xs"
                     >
-                      <span className="flex items-center">
-                        <Building2 className="w-4 h-4 mr-2" />
-                        Saquetto Industrial
-                      </span>
-                      <Badge variant="secondary" className="ml-2">
+                      Saquetto
+                      <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px]">
                         {data?.saquetto.totalNotas || 0}
                       </Badge>
                     </Button>
@@ -272,58 +273,28 @@ export function Dashboard() {
                       variant={filterType === 'clientes' ? 'default' : 'outline'}
                       onClick={() => setFilterType('clientes')}
                       size="sm"
-                      className="w-full sm:w-auto justify-between sm:justify-center"
+                      className="h-8 px-3 text-xs"
                     >
-                      <span className="flex items-center">
-                        <Building2 className="w-4 h-4 mr-2" />
-                        Clientes
-                      </span>
-                      <Badge variant="secondary" className="ml-2">
+                      Clientes
+                      <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-[10px]">
                         {data?.clientes.totalNotas || 0}
                       </Badge>
                     </Button>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm text-muted-foreground">Regime Tributário:</span>
-                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                      <Button
-                        variant={taxRegimeFilter === 'all' ? 'default' : 'outline'}
-                        onClick={() => setTaxRegimeFilter('all')}
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
-                        <Receipt className="w-4 h-4 mr-2" />
-                        Todos
-                      </Button>
-                      <Button
-                        variant={taxRegimeFilter === 'simples' ? 'default' : 'outline'}
-                        onClick={() => setTaxRegimeFilter('simples')}
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
-                        <Receipt className="w-4 h-4 mr-2" />
-                        Simples Nacional
-                      </Button>
-                      <Button
-                        variant={taxRegimeFilter === 'presumido' ? 'default' : 'outline'}
-                        onClick={() => setTaxRegimeFilter('presumido')}
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
-                        <Receipt className="w-4 h-4 mr-2" />
-                        Presumido/Real
-                      </Button>
-                      <Button
-                        variant={taxRegimeFilter === 'sem_informacao' ? 'default' : 'outline'}
-                        onClick={() => setTaxRegimeFilter('sem_informacao')}
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
-                        <Receipt className="w-4 h-4 mr-2" />
-                        Sem Informação
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">Regime:</span>
+                    <Select value={taxRegimeFilter} onValueChange={(value) => setTaxRegimeFilter(value as TaxRegime)}>
+                      <SelectTrigger className="h-8 w-[160px] text-xs">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="simples">Simples Nacional</SelectItem>
+                        <SelectItem value="presumido">Presumido/Real</SelectItem>
+                        <SelectItem value="sem_informacao">Sem Informação</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -331,7 +302,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div id="dashboard-content" className="max-w-7xl mx-auto p-6 md:p-8">
+      <div id="dashboard-content" className="max-w-7xl mx-auto p-4 md:p-6">
         {activeView === 'dashboard' ? (
           <>
             {(() => {
@@ -347,28 +318,11 @@ export function Dashboard() {
 
               // Calculate metrics with filtered data using imported function
               const currentData = filteredData.length > 0 ? calcularMetricas(filteredData) : getEmptyMetrics();
-              
-              // Generate insights
-              const complianceRate = currentData.totalNotas > 0 ? ((currentData.notasAprovadas / currentData.totalNotas) * 100).toFixed(1) : '0';
-              const insights = [
-                {
-                  type: 'success' as const,
-                  message: `Compliance: ${complianceRate}% - ${parseFloat(complianceRate) > 90 ? 'Excelente! 🎉' : parseFloat(complianceRate) > 70 ? 'Bom desempenho' : 'Precisa atenção'}`
-                },
-                ...(currentData.notasAlerta > 0 ? [{
-                  type: 'warning' as const,
-                  message: `Atenção: ${currentData.notasAlerta} notas precisam de revisão`
-                }] : []),
-                ...(currentData.notasReprovadas > 0 ? [{
-                  type: 'warning' as const,
-                  message: `Crítico: ${currentData.notasReprovadas} notas reprovadas`
-                }] : [])
-              ];
 
               return (
                 <>
                   {/* Hero Card - Valor Total */}
-                  <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <HeroMetricCard
                       title="Valor Total"
                       value={`R$ ${currentData.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
@@ -382,7 +336,7 @@ export function Dashboard() {
                   </div>
 
                   {/* Métricas Principais */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                     <MetricCard
                       title="Total de Notas"
                       value={currentData.totalNotas.toLocaleString()}
@@ -423,13 +377,8 @@ export function Dashboard() {
                     />
                   </div>
 
-                  {/* Insights Banner */}
-                  <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-                    <InsightsBanner insights={insights} />
-                  </div>
-
                   {/* NCM Alerts Section */}
-                  <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                  <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
                     <NCMAlertsList limit={10} />
                   </div>
 

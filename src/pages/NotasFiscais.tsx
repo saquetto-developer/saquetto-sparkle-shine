@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,10 +28,10 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Search, FileText, Calendar, Filter, Download, Receipt, X } from 'lucide-react'
+import { Search, FileText, Calendar, Filter, Download, X, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { getPublicInvoiceUrl } from '@/lib/invoiceStorage'
-import { filterByTaxRegime, getTaxRegimeShortLabel, type TaxRegime } from '@/lib/taxRegimeUtils'
+import { filterByTaxRegime, type TaxRegime } from '@/lib/taxRegimeUtils'
 import { StatusChangeForm } from '@/components/StatusChangeForm'
 import { NotaFiscalTabs } from '@/components/NotaFiscalTabs'
 import { getStatusHistory, type StatusHistoryEntry } from '@/lib/statusUpdate'
@@ -156,6 +156,12 @@ export default function NotasFiscais() {
 
   const [clientes, setClientes] = useState<string[]>([])
   const [naturezas, setNaturezas] = useState<string[]>([])
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 100
 
   // Read URL params and apply filters
   useEffect(() => {
@@ -274,6 +280,83 @@ export default function NotasFiscais() {
 
     return matchesSearch && matchesCliente && matchesSituacao && matchesNatureza
   })
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return current.direction === 'asc'
+          ? { key, direction: 'desc' }
+          : null
+      }
+      return { key, direction: 'asc' }
+    })
+  }
+
+  const sortedNotas = useMemo(() => {
+    if (!sortConfig) return filteredNotas
+
+    return [...filteredNotas].sort((a, b) => {
+      let aValue: any = a[sortConfig.key as keyof NotaFiscal]
+      let bValue: any = b[sortConfig.key as keyof NotaFiscal]
+
+      // Handle nulls
+      if (aValue === null || aValue === undefined) return 1
+      if (bValue === null || bValue === undefined) return -1
+
+      // Handle numbers (valor_total_nfe)
+      if (sortConfig.key === 'valor_total_nfe') {
+        aValue = parseFloat(String(aValue) || '0')
+        bValue = parseFloat(String(bValue) || '0')
+      }
+
+      // Handle dates (data_emissao)
+      if (sortConfig.key === 'data_emissao') {
+        aValue = new Date(String(aValue)).getTime()
+        bValue = new Date(String(bValue)).getTime()
+      }
+
+      // String comparison for other fields
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase()
+        bValue = bValue.toLowerCase()
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filteredNotas, sortConfig])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(sortedNotas.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedNotas = sortedNotas.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filters, sortConfig])
+
+  const SortableHeader = ({ column, label }: { column: string; label: string }) => (
+    <TableHead
+      className="cursor-pointer hover:bg-muted/50 select-none"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortConfig?.key === column ? (
+          sortConfig.direction === 'asc' ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="h-4 w-4 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   const formatCurrency = (value: string) => {
     const numValue = parseFloat(value || '0')
@@ -615,19 +698,18 @@ export default function NotasFiscais() {
             <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Operação</TableHead>
-                <TableHead>CFOP Recomendado</TableHead>
-                <TableHead>Regime</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <SortableHeader column="numero_nfe" label="Numero" />
+                <SortableHeader column="data_emissao" label="Data" />
+                <SortableHeader column="destinatario_razao_social" label="Cliente" />
+                <SortableHeader column="valor_total_nfe" label="Valor" />
+                <SortableHeader column="cfop" label="CFOP" />
+                <SortableHeader column="cfop_indicado" label="CFOP Indicado" />
+                <SortableHeader column="situacao" label="Status" />
+                <TableHead className="text-right">Acoes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredNotas.slice(0, 100).map((nota, index) => (
+              {paginatedNotas.map((nota, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-mono text-sm">
                     {nota.numero_nfe}
@@ -641,22 +723,16 @@ export default function NotasFiscais() {
                   <TableCell>
                     {formatCurrency(nota.valor_total_nfe)}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {nota.natureza_operacao}
+                  <TableCell className="text-sm font-mono">
+                    {nota.cfop ? formatCFOP(nota.cfop) : '-'}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-sm font-mono">
                     {nota.cfop_indicado ? formatCFOP(nota.cfop_indicado) : '-'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">
-                      <Receipt className="w-3 h-3 mr-1" />
-                      {getTaxRegimeShortLabel(nota.simples_optante)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
                     <Badge variant={
-                      nota.situacao === 'Aprovado' ? 'default' : 
-                      nota.situacao === 'Alerta' ? 'secondary' : 
+                      nota.situacao === 'Aprovado' ? 'default' :
+                      nota.situacao === 'Alerta' ? 'secondary' :
                       'destructive'
                     }
                     className={
@@ -674,7 +750,6 @@ export default function NotasFiscais() {
                       >
                         Detalhes
                       </Button>
-
                       <Button
                         variant="outline"
                         size="sm"
@@ -691,9 +766,63 @@ export default function NotasFiscais() {
           </Table>
             </div>
           </div>
-          {filteredNotas.length > 100 && (
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Mostrando 100 de {filteredNotas.length} notas. Use os filtros para refinar a busca.
+          {/* Pagination Controls */}
+          {sortedNotas.length > 0 && (
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground">
+                Mostrando {startIndex + 1} a {Math.min(endIndex, sortedNotas.length)} de {sortedNotas.length} notas
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Anterior
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {/* Show page numbers */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page => {
+                        // Show first, last, current, and adjacent pages
+                        return page === 1 ||
+                               page === totalPages ||
+                               Math.abs(page - currentPage) <= 1
+                      })
+                      .map((page, index, array) => {
+                        // Add ellipsis between non-consecutive pages
+                        const showEllipsisBefore = index > 0 && page - array[index - 1] > 1
+                        return (
+                          <span key={page} className="flex items-center">
+                            {showEllipsisBefore && (
+                              <span className="px-2 text-muted-foreground">...</span>
+                            )}
+                            <Button
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(page)}
+                              className="min-w-[36px]"
+                            >
+                              {page}
+                            </Button>
+                          </span>
+                        )
+                      })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Próximo
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

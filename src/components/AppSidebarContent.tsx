@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useLocation, NavLink } from "react-router-dom"
 import {
   BarChart3,
@@ -7,12 +6,8 @@ import {
   Building2,
   ChartLine,
   AlertTriangle,
-  LogOut
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/contexts/AuthContext"
-import { ThemeToggle } from "@/components/ThemeToggle"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -32,22 +27,9 @@ interface AppSidebarContentProps {
 
 export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarContentProps) {
   const location = useLocation()
-  const { user, logout } = useAuth()
   const { state } = useSidebar()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
-  
-  const collapsed = state === "collapsed"
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true)
-    try {
-      await logout()
-    } catch (error) {
-      console.error("Logout error:", error)
-    } finally {
-      setIsLoggingOut(false)
-    }
-  }
+  const collapsed = state === "collapsed"
 
   const handleItemClick = () => {
     if (onItemClick) {
@@ -132,58 +114,6 @@ export function AppSidebarContent({ isMobile = false, onItemClick }: AppSidebarC
             <NavigationItem key={item.title} item={item} />
           ))}
         </nav>
-      </div>
-
-      {/* Footer */}
-      <div className={cn(
-        "border-t p-4 space-y-3",
-        collapsed && "px-2"
-      )}>
-        {user && !collapsed && (
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">
-              <p>Logado como:</p>
-              <p className="font-medium text-foreground truncate">{user.email}</p>
-            </div>
-            {!isMobile && (
-              <div className="flex items-center justify-start">
-                <ThemeToggle />
-              </div>
-            )}
-          </div>
-        )}
-        
-        {collapsed && !isMobile ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="w-full justify-center p-2 text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{isLoggingOut ? "Saindo..." : "Sair"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            {!collapsed && (isLoggingOut ? "Saindo..." : "Sair")}
-          </Button>
-        )}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Search, Building2, MapPin, Phone, Mail, TrendingUp } from 'lucide-react'
+import { Search, Building2, MapPin, Phone, Mail, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
 interface Fornecedor {
@@ -48,6 +48,10 @@ export default function Fornecedores() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFornecedor, setSelectedFornecedor] = useState<Fornecedor | null>(null)
   const [sortBy, setSortBy] = useState<'nome' | 'valor' | 'notas'>('valor')
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null)
 
   useEffect(() => {
     fetchFornecedores()
@@ -138,7 +142,7 @@ export default function Fornecedores() {
   }
 
   const filteredFornecedores = fornecedores
-    .filter(fornecedor => 
+    .filter(fornecedor =>
       fornecedor.razao_social.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fornecedor.cnpj.includes(searchTerm)
     )
@@ -154,6 +158,76 @@ export default function Fornecedores() {
           return 0
       }
     })
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return current.direction === 'asc'
+          ? { key, direction: 'desc' }
+          : null
+      }
+      return { key, direction: 'asc' }
+    })
+  }
+
+  const sortedFornecedores = useMemo(() => {
+    // Se sortConfig esta definido, usa ele (prioridade sobre sortBy do dropdown)
+    if (sortConfig) {
+      return [...filteredFornecedores].sort((a, b) => {
+        let aValue: any = a[sortConfig.key as keyof Fornecedor]
+        let bValue: any = b[sortConfig.key as keyof Fornecedor]
+
+        // Handle nulls
+        if (aValue === null || aValue === undefined) return 1
+        if (bValue === null || bValue === undefined) return -1
+
+        // Handle numbers (total_notas, valor_total)
+        if (sortConfig.key === 'total_notas' || sortConfig.key === 'valor_total') {
+          aValue = Number(aValue) || 0
+          bValue = Number(bValue) || 0
+        }
+
+        // Handle dates (ultima_compra)
+        if (sortConfig.key === 'ultima_compra') {
+          aValue = new Date(String(aValue)).getTime()
+          bValue = new Date(String(bValue)).getTime()
+        }
+
+        // String comparison for other fields
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          aValue = aValue.toLowerCase()
+          bValue = bValue.toLowerCase()
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    // Fallback para filteredFornecedores (ja ordenado pelo sortBy dropdown)
+    return filteredFornecedores
+  }, [filteredFornecedores, sortConfig])
+
+  const SortableHeader = ({ column, label }: { column: string; label: string }) => (
+    <TableHead
+      className="cursor-pointer hover:bg-muted/50 select-none"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortConfig?.key === column ? (
+          sortConfig.direction === 'asc' ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="h-4 w-4 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -275,16 +349,16 @@ export default function Fornecedores() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Razão Social</TableHead>
-                <TableHead>CNPJ</TableHead>
-                <TableHead>Total Notas</TableHead>
-                <TableHead>Valor Total</TableHead>
-                <TableHead>Última Compra</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <SortableHeader column="razao_social" label="Razao Social" />
+                <SortableHeader column="cnpj" label="CNPJ" />
+                <SortableHeader column="total_notas" label="Total Notas" />
+                <SortableHeader column="valor_total" label="Valor Total" />
+                <SortableHeader column="ultima_compra" label="Ultima Compra" />
+                <TableHead className="text-right">Acoes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredFornecedores.slice(0, 50).map((fornecedor, index) => (
+              {sortedFornecedores.slice(0, 50).map((fornecedor, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium max-w-xs truncate">
                     {fornecedor.razao_social}
@@ -371,9 +445,9 @@ export default function Fornecedores() {
               ))}
             </TableBody>
           </Table>
-          {filteredFornecedores.length > 50 && (
+          {sortedFornecedores.length > 50 && (
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              Mostrando 50 de {filteredFornecedores.length} fornecedores. Use a busca para refinar.
+              Mostrando 50 de {sortedFornecedores.length} fornecedores. Use a busca para refinar.
             </div>
           )}
         </CardContent>

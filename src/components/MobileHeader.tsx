@@ -1,8 +1,9 @@
-import { Menu } from "lucide-react"
+import { Menu, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { AppSidebarContent } from "@/components/AppSidebarContent"
+import { UserDropdownMenu } from "@/components/UserDropdownMenu"
 import saquettoLogo from "@/assets/saquetto-logo.png"
 import { useState } from "react"
 
@@ -35,8 +36,13 @@ export function MobileHeader() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-9 w-9">
+            <Bell className="h-4 w-4" />
+            <span className="sr-only">Notificações</span>
+          </Button>
           <ThemeToggle />
+          <UserDropdownMenu />
         </div>
       </div>
     </header>

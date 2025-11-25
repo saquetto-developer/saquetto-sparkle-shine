@@ -1,14 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ShoppingCart, 
-  Truck, 
-  RotateCcw, 
-  Package, 
+import {
+  ShoppingCart,
+  Truck,
+  RotateCcw,
+  Package,
   ArrowRightLeft,
   Building,
-  FileText,
-  MoreHorizontal
+  FileText
 } from 'lucide-react';
 
 interface OperationData {
@@ -80,28 +79,28 @@ export function OperationsChart({ operacoes }: OperationsChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {operacoes.slice(0, 6).map((operacao, index) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {operacoes.map((operacao, index) => {
             const Icon = getOperationIcon(operacao.tipo);
             const colorClass = getOperationColor(index);
-            
+
             return (
               <div
                 key={operacao.tipo}
-                className={`p-4 rounded-lg border ${colorClass} transition-all hover:shadow-md`}
+                className={`p-3 rounded-lg border ${colorClass} transition-all hover:shadow-md`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <Icon className="w-5 h-5" />
-                  <Badge variant="secondary" className="text-xs">
+                <div className="flex items-center justify-between mb-1.5">
+                  <Icon className="w-4 h-4" />
+                  <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
                     {operacao.percentual.toFixed(1)}%
                   </Badge>
                 </div>
-                
-                <h3 className="font-semibold text-sm mb-1 capitalize">
+
+                <h3 className="font-semibold text-xs mb-1 capitalize truncate" title={operacao.tipo.toLowerCase()}>
                   {operacao.tipo.toLowerCase()}
                 </h3>
-                
-                <div className="space-y-1 text-xs">
+
+                <div className="space-y-0.5 text-[11px]">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Notas:</span>
                     <span className="font-medium">{operacao.quantidade}</span>
@@ -109,7 +108,7 @@ export function OperationsChart({ operacoes }: OperationsChartProps) {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Valor:</span>
                     <span className="font-medium">
-                      R$ {operacao.valor.toLocaleString('pt-BR', { 
+                      R$ {operacao.valor.toLocaleString('pt-BR', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
                       })}
@@ -119,17 +118,6 @@ export function OperationsChart({ operacoes }: OperationsChartProps) {
               </div>
             );
           })}
-          
-          {operacoes.length > 6 && (
-            <div className="p-4 rounded-lg border bg-muted/10 text-muted-foreground border-muted-foreground/20 transition-all hover:shadow-md flex items-center justify-center">
-              <div className="text-center">
-                <MoreHorizontal className="w-5 h-5 mx-auto mb-2" />
-                <span className="text-sm">
-                  +{operacoes.length - 6} outros tipos
-                </span>
-              </div>
-            </div>
-          )}
         </div>
         
         <div className="mt-4 pt-4 border-t border-border">

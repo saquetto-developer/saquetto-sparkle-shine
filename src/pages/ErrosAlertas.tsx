@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,13 +28,16 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { 
-  Search, 
-  AlertTriangle, 
-  XCircle, 
-  AlertCircle, 
+import {
+  Search,
+  AlertTriangle,
+  XCircle,
+  AlertCircle,
   Download,
-  Filter
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
@@ -70,6 +73,10 @@ export default function ErrosAlertas() {
 
   const [tiposErro, setTiposErro] = useState<string[]>([])
   const [clientes, setClientes] = useState<string[]>([])
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null)
 
   // Read URL params and apply filters
   useEffect(() => {
@@ -156,6 +163,66 @@ export default function ErrosAlertas() {
 
     return matchesSearch && matchesTipo && matchesCliente
   })
+
+  const handleSort = (key: string) => {
+    setSortConfig(current => {
+      if (current?.key === key) {
+        return current.direction === 'asc'
+          ? { key, direction: 'desc' }
+          : null
+      }
+      return { key, direction: 'asc' }
+    })
+  }
+
+  const sortedErros = useMemo(() => {
+    if (!sortConfig) return filteredErros
+
+    return [...filteredErros].sort((a, b) => {
+      let aValue: any = a[sortConfig.key as keyof ErroNota]
+      let bValue: any = b[sortConfig.key as keyof ErroNota]
+
+      // Handle nulls
+      if (aValue === null || aValue === undefined) return 1
+      if (bValue === null || bValue === undefined) return -1
+
+      // Handle numbers (valor_total_nfe)
+      if (sortConfig.key === 'valor_total_nfe') {
+        aValue = parseFloat(String(aValue) || '0')
+        bValue = parseFloat(String(bValue) || '0')
+      }
+
+      // String comparison for other fields
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase()
+        bValue = bValue.toLowerCase()
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filteredErros, sortConfig])
+
+  const SortableHeader = ({ column, label }: { column: string; label: string }) => (
+    <TableHead
+      className="cursor-pointer hover:bg-muted/50 select-none font-semibold"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortConfig?.key === column ? (
+          sortConfig.direction === 'asc' ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )
+        ) : (
+          <ArrowUpDown className="h-4 w-4 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   const getErrorIcon = (tipo: string) => {
     switch (tipo) {
@@ -413,17 +480,17 @@ export default function ErrosAlertas() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableHead className="font-semibold">Documento</TableHead>
-                    <TableHead className="font-semibold">Cliente</TableHead>
-                    <TableHead className="font-semibold">Operação</TableHead>
-                    <TableHead className="font-semibold">Valor</TableHead>
-                    <TableHead className="font-semibold">Produto</TableHead>
-                    <TableHead className="font-semibold">Tipo de Erro</TableHead>
-                    <TableHead className="text-right font-semibold">Ações</TableHead>
+                    <SortableHeader column="numero_nfe" label="Documento" />
+                    <SortableHeader column="destinatario_razao_social" label="Cliente" />
+                    <SortableHeader column="natureza_operacao" label="Operacao" />
+                    <SortableHeader column="valor_total_nfe" label="Valor" />
+                    <SortableHeader column="descricao_produto" label="Produto" />
+                    <SortableHeader column="tipo_erro" label="Tipo de Erro" />
+                    <TableHead className="text-right font-semibold">Acoes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredErros.slice(0, 50).map((erro, index) => (
+                  {sortedErros.slice(0, 50).map((erro, index) => (
                     <TableRow
                       key={index}
                       className={`hover:bg-muted/50 transition-colors ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
@@ -596,12 +663,12 @@ export default function ErrosAlertas() {
                 </TableBody>
               </Table>
             </div>
-            {filteredErros.length > 50 && (
+            {sortedErros.length > 50 && (
               <div className="border-t-2 bg-muted/30 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
                     Mostrando <span className="font-semibold text-foreground">50</span> de{' '}
-                    <span className="font-semibold text-foreground">{filteredErros.length}</span> erros encontrados
+                    <span className="font-semibold text-foreground">{sortedErros.length}</span> erros encontrados
                   </p>
                   <Button variant="outline" size="sm" className="gap-2">
                     Carregar mais

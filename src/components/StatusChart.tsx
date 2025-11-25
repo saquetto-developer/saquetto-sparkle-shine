@@ -1,5 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { Pie, PieChart, Label } from "recharts"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface StatusChartProps {
   aprovadas: number;
@@ -7,14 +13,21 @@ interface StatusChartProps {
   alertas: number;
 }
 
-export function StatusChart({ aprovadas, reprovadas, alertas }: StatusChartProps) {
-  const data = [
-    { name: 'Aprovadas', value: aprovadas, color: 'hsl(var(--success))' },
-    { name: 'Alertas', value: alertas, color: 'hsl(var(--warning))' },
-    { name: 'Reprovadas', value: reprovadas, color: 'hsl(var(--destructive))' }
-  ];
+const chartConfig = {
+  value: { label: "Quantidade" },
+  aprovadas: { label: "Aprovadas", color: "hsl(var(--success))" },
+  alertas: { label: "Alertas", color: "hsl(var(--warning))" },
+  reprovadas: { label: "Reprovadas", color: "hsl(var(--destructive))" },
+} satisfies ChartConfig
 
-  const total = aprovadas + reprovadas + alertas;
+export function StatusChart({ aprovadas, reprovadas, alertas }: StatusChartProps) {
+  const total = aprovadas + reprovadas + alertas
+
+  const chartData = [
+    { status: "aprovadas", value: aprovadas, fill: "var(--color-aprovadas)" },
+    { status: "alertas", value: alertas, fill: "var(--color-alertas)" },
+    { status: "reprovadas", value: reprovadas, fill: "var(--color-reprovadas)" },
+  ]
 
   return (
     <Card className="bg-gradient-card shadow-card">
@@ -22,36 +35,37 @@ export function StatusChart({ aprovadas, reprovadas, alertas }: StatusChartProps
         <CardTitle className="text-lg font-semibold">Status das Notas Fiscais</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
           <PieChart>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              fill="#8884d8"
+              data={chartData}
               dataKey="value"
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+              nameKey="status"
+              innerRadius={60}
+              strokeWidth={5}
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                        <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold">
+                          {total.toLocaleString()}
+                        </tspan>
+                        <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground">
+                          Notas
+                        </tspan>
+                      </text>
+                    )
+                  }
+                }}
+              />
             </Pie>
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: 'var(--radius)',
-                color: 'hsl(var(--foreground))'
-              }}
-              formatter={(value: number) => [
-                `${value} notas (${((value / total) * 100).toFixed(1)}%)`, 
-                'Quantidade'
-              ]}
-            />
           </PieChart>
-        </ResponsiveContainer>
-        
+        </ChartContainer>
+
+        {/* Grid de estatisticas mantido */}
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-success">{aprovadas}</div>
@@ -68,5 +82,5 @@ export function StatusChart({ aprovadas, reprovadas, alertas }: StatusChartProps
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
