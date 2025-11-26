@@ -270,7 +270,7 @@ export default function NotasFiscais() {
   const taxRegimeFilteredNotas = filterByTaxRegime(notas, filters.regimeTributario);
 
   const filteredNotas = taxRegimeFilteredNotas.filter(nota => {
-    const matchesSearch = 
+    const matchesSearch =
       nota.numero_nfe?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       nota.destinatario_razao_social?.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -278,7 +278,15 @@ export default function NotasFiscais() {
     const matchesSituacao = filters.situacao === 'all' || nota.situacao === filters.situacao
     const matchesNatureza = filters.natureza === 'all' || nota.natureza_operacao === filters.natureza
 
-    return matchesSearch && matchesCliente && matchesSituacao && matchesNatureza
+    // Filtro de período (mês/ano)
+    let matchesPeriodo = true
+    if (filters.periodo && nota.data_emissao) {
+      const notaDate = new Date(nota.data_emissao)
+      const [filterYear, filterMonth] = filters.periodo.split('-').map(Number)
+      matchesPeriodo = notaDate.getFullYear() === filterYear && (notaDate.getMonth() + 1) === filterMonth
+    }
+
+    return matchesSearch && matchesCliente && matchesSituacao && matchesNatureza && matchesPeriodo
   })
 
   const handleSort = (key: string) => {
